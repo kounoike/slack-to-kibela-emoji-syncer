@@ -7,7 +7,7 @@ SLACKとKibelaの両方でトークンが必要。
 
 
 
-[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/seratch/bolt-on-heroku/tree/master)
+[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/kounoike/slack-to-kibela-emoji-syncer/tree/master)
 
 ## Slack ⚡️ Bolt
 
