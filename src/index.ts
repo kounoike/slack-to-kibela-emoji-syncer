@@ -16,8 +16,14 @@ app.message(/hello/, async ({ message, say }) => {
 });
 
 app.message(/emoji/, async ({ message, context, say }) => {
-  const result = await app.client.emoji.list({token: context.botToken});
-  say(`emojis: ${result}`);
+  const result = await app.client.emoji.list({token: context.botToken}) as any;
+  if (result.ok) {
+    for (const k in result.emoji) {
+      say(`emojis: ${k}:${result.emoji[k]}`);
+    }
+  } else {
+    console.log(result.error);
+  }
 });
 
 (async () => {
