@@ -16,7 +16,7 @@ app.message(/hello/, async ({ message, say }) => {
 });
 
 app.message(/emoji/, async ({ message, context, say }) => {
-  const result = await app.client.emoji.list();
+  const result = await app.client.emoji.list({token: context.botToken});
   say(`emojis: ${result}`);
 });
 
