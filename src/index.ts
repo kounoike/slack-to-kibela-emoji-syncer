@@ -86,7 +86,7 @@ app.event('emoji_changed', async({event, client}) => {
   } catch (error) {
     console.log(error);
   }
-}));
+});
 
 (async () => {
   // Start your app
