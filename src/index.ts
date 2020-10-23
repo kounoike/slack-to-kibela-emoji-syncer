@@ -29,7 +29,7 @@ app.message(/emoji/, async ({ message, context, say }) => {
   const result = await app.client.emoji.list({token: context.botToken}) as any;
   if (result.ok) {
     for (const k in result.emoji) {
-      const datauri = imageDataURI.encodeFromURL(result.emoji[k])
+      const datauri = await imageDataURI.encodeFromURL(result.emoji[k])
       say(`emojis: ${k}:${result.emoji[k]}:${datauri}`);
     }
   } else {
