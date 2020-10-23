@@ -64,6 +64,7 @@ app.message(/hello/, async ({ message, say }) => {
 app.message(/emoji/, async ({ message, context, say }) => {
   const result = await app.client.emoji.list({token: context.botToken}) as any;
   if (result.ok) {
+    say(`Start emoji sync`)
     for (const code in result.emoji) {
       await createEmoji(code, result.emoji[code]);
     }
