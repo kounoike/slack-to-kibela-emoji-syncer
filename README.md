@@ -5,9 +5,23 @@ Slack絵文字をKibelaに同期する感じのヤツ
 Herokuにデプロイする感じ。
 SLACKとKibelaの両方でトークンが必要。
 
-
-
 [![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/kounoike/slack-to-kibela-emoji-syncer/tree/master)
+
+これでデプロイして必要な変数を埋めればOK
+
+## 使い方
+
+なんとか頑張ってインストールする。
+
+どっかのチャンネルに呼ぶ。
+
+そのチャンネルで `hello` と送ると返してくれる（動作確認）。
+
+そのチャンネルで `emoji sync` と送ると同期を始める。（TODO:チャンネルに呼ばないで同期開始するイケてる方法）
+
+絵文字の追加イベントも見ているので以降追加された絵文字は自動的にKibelaにも追加される。
+
+TODO:削除イベントを見てKibela側からも削除する。
 
 ## Slack ⚡️ Bolt
 
