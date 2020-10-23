@@ -43,7 +43,7 @@ async function createEmoji(code: string, imageUrl: string) {
     }).then(response => {
       console.log(`create request ${code}: ${JSON.stringify(response)}`)
     }).catch(e => console.log(`fetch request error: ${e}`))
-  }).catch(e => console.log(`encodeFromURL Error: ${e}`))
+  })
 }
 
 const app = new App({
@@ -66,7 +66,7 @@ app.message(/emoji/, async ({ message, context, say }) => {
   if (result.ok) {
     say(`Start emoji sync`)
     for (const code in result.emoji) {
-      await createEmoji(code, result.emoji[code]);
+      await createEmoji(code, result.emoji[code]).catch(e => console.log(`CreateEmoji Error: ${e}`));
     }
     say(`OK! imported ${result.emoji.length} emojis`);
   } else {
