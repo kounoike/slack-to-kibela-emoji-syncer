@@ -15,6 +15,11 @@ app.message(/hello/, async ({ message, say }) => {
   await say(`Hey there <@${message.user}>!`);
 });
 
+app.message(/emoji/, async ({ message, context, say }) => {
+  const result = await app.client.emoji.list();
+  say(`emojis: ${result}`);
+});
+
 (async () => {
   // Start your app
   await app.start(process.env.PORT || 3000);
