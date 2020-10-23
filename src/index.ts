@@ -23,6 +23,7 @@ mutation($code: String!, $url: String!) {
 
 async function createEmoji(code: string, imageUrl: string) {
   return imageDataURI.encodeFromURL(imageUrl).then((datauri: string) => {
+    console.log(`${code}: ${imageUrl.slice(0, 20)}`);
     return fetch(kibelaEndpoint, {
       method: "POST",
       redirect: "follow",
@@ -66,6 +67,7 @@ app.message(/emoji/, async ({ message, context, say }) => {
     for (const code in result.emoji) {
       await createEmoji(code, result.emoji[code]);
     }
+    say(`OK! imported ${result.emoji.length} emojis`);
   } else {
     console.log(result.error);
   }
