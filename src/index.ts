@@ -1,5 +1,15 @@
 import { App } from '@slack/bolt';
 
+import fetch from "node-fetch";
+import gql from "graphql-tag";
+import { print as printGql } from "graphql/language/printer"
+const imageDataURI = require("image-data-uri");
+
+const kibelaTeam = process.env.KIBELA_TEAM;
+const kibelaToken = process.env.KIBELA_TOKEN;
+const kibelaEndpoint = `https://${kibelaTeam}.kibe.la/api/v1`;
+const userAgent = "Slack-To-Kibela-Emoji-Syncer/1.0.0";
+
 const app = new App({
   token: process.env.SLACK_BOT_TOKEN,
   signingSecret: process.env.SLACK_SIGNING_SECRET
@@ -19,7 +29,8 @@ app.message(/emoji/, async ({ message, context, say }) => {
   const result = await app.client.emoji.list({token: context.botToken}) as any;
   if (result.ok) {
     for (const k in result.emoji) {
-      say(`emojis: ${k}:${result.emoji[k]}`);
+      const datauri = imageDataURI.encodeFromURL(result.emoji[k])
+      say(`emojis: ${k}:${result.emoji[k]}:${datauri}`);
     }
   } else {
     console.log(result.error);
