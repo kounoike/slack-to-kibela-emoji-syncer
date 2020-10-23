@@ -11,7 +11,7 @@ const kibelaEndpoint = `https://${kibelaTeam}.kibe.la/api/v1`;
 const userAgent = "Slack-To-Kibela-Emoji-Syncer/1.0.0";
 
 const kibelaEmojiMutationQuery = gql`
-mutatio($code: String!, $url: String!) {
+mutation($code: String!, $url: String!) {
   createCustomEmoji(input: {
     emojiCode: $code
     imageDataUrl: $url
