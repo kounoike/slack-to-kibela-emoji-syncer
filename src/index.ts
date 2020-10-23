@@ -68,7 +68,7 @@ app.message(/emoji/, async ({ message, context, say }) => {
     for (const code in result.emoji) {
       await createEmoji(code, result.emoji[code]).catch(e => console.log(`CreateEmoji Error: ${e}`));
     }
-    say(`OK! imported ${result.emoji.length} emojis`);
+    say(`OK! imported ${Object.keys(result.emoji).length} emojis`);
   } else {
     console.log(result.error);
   }
