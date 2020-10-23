@@ -23,7 +23,7 @@ mutation($code: String!, $url: String!) {
 
 async function createEmoji(code: string, imageUrl: string) {
   return imageDataURI.encodeFromURL(imageUrl).then((datauri: string) => {
-    console.log(`${code}: ${imageUrl} : ${datauri.slice(0, 20)}`);
+    console.log(`${code}: ${imageUrl} : ${datauri.slice(0, 60)}`);
     return fetch(kibelaEndpoint, {
       method: "POST",
       redirect: "follow",
