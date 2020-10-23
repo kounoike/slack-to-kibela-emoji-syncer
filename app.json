@@ -1,11 +1,13 @@
 {
-    "name": "Bolt app on Heroku",
-    "description": "Bolt example app in TypeScript on Heroku",
-    "repository": "https://github.com/seratch/bolt-on-heroku",
+    "name": "Slack to Kibela emoji syncer",
+    "description": "Slack to Kibela emoji syncer app on Heroku",
+    "repository": "https://github.com/kounoike/bolt-on-heroku",
     "keywords": [
         "Slack",
         "Slack API",
-        "Heroku"
+        "Heroku",
+        "Kibela",
+        "emoji"
     ],
     "env": {
         "SLACK_SIGNING_SECRET": {
