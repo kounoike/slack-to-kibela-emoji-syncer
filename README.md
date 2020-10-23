@@ -1,4 +1,11 @@
-# Slack Bolt app on Heroku
+REA# Slack-to-Kibela Emoji Syncer
+
+Slack絵文字をKibelaに同期する感じのヤツ
+
+Herokuにデプロイする感じ。
+SLACKとKibelaの両方でトークンが必要。
+
+
 
 [![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/seratch/bolt-on-heroku/tree/master)
 
@@ -18,8 +25,8 @@ https://api.slack.com/apps
 * Features > OAuth & Permissions:
   * Scopes:
     * "channels:history"
-    * "chat:write:bot"
-    * "bot"
+    * "chat:write"
+    * "emoji:read"
   * Click "Save Changes"
 * Features > Bot User:
   * Click "Add a Bot User"
@@ -32,6 +39,8 @@ https://api.slack.com/apps
 ```bash
 export SLACK_SIGNING_SECRET=abcd1234567890123456789012345678
 export SLACK_BOT_TOKEN=xoxb-123456789012-123456789012-abcd12345678901234567890
+export KIBELA_TOKEN=secret/...............
+export KIBELA_TEAM=yourteamname
 export DEBUG=1
 npm run local
 ```
@@ -55,6 +64,7 @@ npm run local
     * Set "https://{your app name}.herokuapp.com/slack/events"
   * Subscribe to Workspace Events:
     * Add "message.channels"
+    * Add "emoji_changed"
   * Click "Save Changes"
 
 ### Try the Slack App
