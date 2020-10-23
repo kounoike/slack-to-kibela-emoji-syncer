@@ -61,7 +61,7 @@ app.message(/hello/, async ({ message, say }) => {
   await say(`Hey there <@${message.user}>!`);
 });
 
-app.message(/emoji/, async ({ message, context, say }) => {
+app.message(/emoji sync/, async ({ message, context, say }) => {
   const result = await app.client.emoji.list({token: context.botToken}) as any;
   if (result.ok) {
     say(`Start emoji sync`)
