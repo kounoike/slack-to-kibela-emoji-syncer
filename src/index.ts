@@ -74,6 +74,20 @@ app.message(/emoji/, async ({ message, context, say }) => {
   }
 });
 
+app.event('emoji_changed', async({event, client}) => {
+  try {
+    if(event.subtype === "add") {
+      if(event.name && event.value) {
+        console.log(`creating ${event.name} emoji....`);
+        await createEmoji(event.name, event.value);
+        console.log(`create ${event.name} emoji done.`);
+      }
+    }
+  } catch (error) {
+    console.log(error);
+  }
+}));
+
 (async () => {
   // Start your app
   await app.start(process.env.PORT || 3000);
