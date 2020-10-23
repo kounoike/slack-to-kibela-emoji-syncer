@@ -42,8 +42,8 @@ async function createEmoji(code: string, imageUrl: string) {
       })
     }).then(response => {
       console.log(`create request ${code}: ${JSON.stringify(response)}`)
-    }).catch(e => console.log(e))
-  })
+    }).catch(e => console.log(`fetch request error: ${e}`))
+  }).catch(e => console.log(`encodeFromURL Error: ${e}`))
 }
 
 const app = new App({
