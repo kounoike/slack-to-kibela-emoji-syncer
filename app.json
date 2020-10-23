@@ -17,6 +17,14 @@
         "SLACK_BOT_TOKEN": {
             "description": "Slack App Bot Token",
             "value": "xoxb-************-************-************************"
+        },
+        "KIBELA_TEAM": {
+            "description": "Kibela team name",
+            "value": "yourteamname"
+        },
+        "KIBELA_TOKEN": {
+            "description": "Kibela API Token",
+            "value": "secret/**/*******/*****************************"
         }
     },
     "image": "heroku/nodejs"
