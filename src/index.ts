@@ -36,7 +36,10 @@ query($path: String!) {
         url
       }
     }
-    folderName
+    folder {
+      path
+      fullName
+    }
     groups {
       name
     }
@@ -148,7 +151,7 @@ async function getKibelaNoteUnfurlFromUrl(url: string): Promise<[string, Message
       //   title_link: note.url,
       //   text: note.summary
       // };
-      const folderName = note.folderName || "フォルダ未設定";
+      const folderName = `<!https://${kibelaTeam}.kibe.la/${note.folder.path}|${note.folder.fullName}>` || "フォルダ未設定";
       let contributors = note.contributors.nodes.map((c:any) => `<${c.url}|${c.realName}>`).join('/');
       if (note.contributors.totalCount > 5) {
         contributors = `${contributors} +${note.contributors.totalCount-5}人`;
@@ -173,7 +176,7 @@ async function getKibelaNoteUnfurlFromUrl(url: string): Promise<[string, Message
             elements: [
               {
                 type: "mrkdwn",
-                text: `*作成者:* ${note.author.realName}`
+                text: `*作成者:* <!${note.author.url}|${note.author.realName}>`
               },
               {
                 type: "mrkdwn",
