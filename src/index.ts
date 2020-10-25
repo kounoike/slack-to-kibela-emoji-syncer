@@ -3,6 +3,7 @@ import { LinkUnfurls, MessageAttachment } from '@slack/types';
 import fetch from "node-fetch";
 import gql from "graphql-tag";
 import { print as printGql } from "graphql/language/printer"
+import { ChatUnfurlArguments } from '@slack/web-api';
 const imageDataURI = require("image-data-uri");
 
 const kibelaTeam = process.env.KIBELA_TEAM;
@@ -146,7 +147,12 @@ app.event('link_shared', async({event, client}) => {
   const messageTs = event.message_ts;
   Promise.all(event.links.map(async (link) => getKibelaNoteUnfurlFromUrl(link.url as string))).then(values => {
     const unfurls = Object.fromEntries(values.filter(v => v.length > 0));
-    client.chat.unfurl(unfurls);
+    const unfurlArgs: ChatUnfurlArguments = {
+      channel: channel,
+      ts: messageTs,
+      unfurls: unfurls
+    };
+    client.chat.unfurl(unfurlArgs);
   })
 });
 
