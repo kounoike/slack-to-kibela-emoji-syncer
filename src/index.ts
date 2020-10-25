@@ -46,7 +46,7 @@ query($path: String!) {
     title
     url
     publishedAt
-    updatedAt
+    contentUpdatedAt
     summary: contentSummaryHtml
   }
 }
@@ -154,19 +154,13 @@ async function getKibelaNoteUnfurlFromUrl(url: string): Promise<[string, Message
             type: "section",
             text: {
               type: "mrkdwn",
-              text: `<${note.url}|*${note.title}*>`,
+              text: `<${note.url}|*${note.title}*>\n${note.summary}`,
             },
             accessory: {
               type: "image",
               image_url: "https://kibe.la/favicon.ico",
               alt_text: "Kibela"
-            },
-            fields: [
-              {
-                type: "plain_text",
-                text: note.summary
-              }
-            ]
+            }
           },
           {
             type: "context",
@@ -189,7 +183,7 @@ async function getKibelaNoteUnfurlFromUrl(url: string): Promise<[string, Message
               },
               {
                 type: "mrkdwn",
-                text: `*更新日:* ${note.updatedAt}`
+                text: `*更新日:* ${note.contentUpdatedAt}`
               },
               {
                 type: "mrkdwn",
