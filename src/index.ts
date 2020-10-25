@@ -38,6 +38,9 @@ query($path: String!) {
     groups {
       name
     }
+    likers {
+      totalCount
+    }
     commentsCount
     id
     title
@@ -191,6 +194,10 @@ async function getKibelaNoteUnfurlFromUrl(url: string): Promise<[string, Message
               {
                 type: "mrkdwn",
                 text: `*コメント数:* ${note.commentsCount}`
+              },
+              {
+                type: "mrkdwn",
+                text: `*イイネ数:* ${note.likers.totalCount}`
               }
             ]
           }
