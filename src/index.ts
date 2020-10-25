@@ -88,6 +88,10 @@ app.event('emoji_changed', async({event, client}) => {
   }
 });
 
+app.event('link_shared', async({event, client}) => {
+  console.log(event, client);
+});
+
 (async () => {
   // Start your app
   await app.start(process.env.PORT || 3000);
