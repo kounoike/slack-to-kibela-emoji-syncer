@@ -128,8 +128,8 @@ app.event('link_shared', async({event, client}) => {
       })
     }).then((response) => {
       console.log(response);
-      console.log(JSON.stringify(response.json()));
-    })
+      return response.json();
+    }).then((json) => console.log(json));
   });
 });
 
