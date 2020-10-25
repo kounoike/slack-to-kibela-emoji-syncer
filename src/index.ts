@@ -42,6 +42,7 @@ query($path: String!) {
     }
     groups {
       name
+      path
     }
     likers {
       totalCount
