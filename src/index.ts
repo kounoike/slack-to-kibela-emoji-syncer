@@ -204,6 +204,7 @@ app.event('link_shared', async({event, client}) => {
   const channel = event.channel;
   const messageTs = event.message_ts;
   Promise.all(event.links.map(async (link) => getKibelaNoteUnfurlFromUrl(link.url as string))).then(values => {
+    console.log(values);
     const unfurls = Object.fromEntries(values.filter(v => v.length > 0));
     const unfurlArgs: ChatUnfurlArguments = {
       channel: channel,
