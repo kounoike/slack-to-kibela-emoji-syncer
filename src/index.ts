@@ -128,9 +128,9 @@ app.event('link_shared', async({event, client}) => {
       })
     }).then((response) => {
       console.log(response);
+      console.log(JSON.stringify(response.json()));
     })
   });
-  console.log(event, client);
 });
 
 (async () => {
