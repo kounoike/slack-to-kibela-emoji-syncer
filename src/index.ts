@@ -152,6 +152,7 @@ app.event('link_shared', async({event, client}) => {
       ts: messageTs,
       unfurls: unfurls
     };
+    console.log(unfurlArgs);
     client.chat.unfurl(unfurlArgs);
   })
 });
