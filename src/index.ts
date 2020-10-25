@@ -117,93 +117,95 @@ app.event('emoji_changed', async({event, client}) => {
 });
 
 async function getKibelaNoteUnfurlFromUrl(url: string): Promise<[string, MessageAttachment]|[]> {
-  return fetch(kibelaEndpoint, {
-    method: "POST",
-    redirect: "follow",
-    headers: {
-      Authorization: `Bearer ${kibelaToken}`,
-      "Content-Type": "application/json",
-      Accept: "application/json",
-      "User-Agent": userAgent
-    },
-    body: JSON.stringify({
-      query: printGql(kibelaLinkDescriptionQuery),
-      variables: {
-        path: url
-      }
-    })
-  }).then((res) => res.json()).catch((e) => console.log(e)).then((json) => {
-    if (json.data) {
-      const note = json.data.note;
-      // const attachment: MessageAttachment = {
-      //   author_icon: note.author.avatarImage.url,
-      //   author_name: note.author.account,
-      //   author_link: note.author.url,
-      //   title: note.title,
-      //   title_link: note.url,
-      //   text: note.summary
-      // };
-      const folderName = note.folderName || "フォルダ未設定";
-      const attachment: MessageAttachment = {
-        color: "#327AC2",
-        blocks: [
-          {
-            type: "section",
-            text: {
-              type: "mrkdwn",
-              text: `<${note.url}|*${note.title}*>`,
-            }
-          },
-          {
-            type: "section",
-            fields: [
-              {
+  return new Promise(function(resolve, reject) {
+    fetch(kibelaEndpoint, {
+      method: "POST",
+      redirect: "follow",
+      headers: {
+        Authorization: `Bearer ${kibelaToken}`,
+        "Content-Type": "application/json",
+        Accept: "application/json",
+        "User-Agent": userAgent
+      },
+      body: JSON.stringify({
+        query: printGql(kibelaLinkDescriptionQuery),
+        variables: {
+          path: url
+        }
+      })
+    }).then((res) => res.json()).then((json) => {
+      if (json.data) {
+        const note = json.data.note;
+        // const attachment: MessageAttachment = {
+        //   author_icon: note.author.avatarImage.url,
+        //   author_name: note.author.account,
+        //   author_link: note.author.url,
+        //   title: note.title,
+        //   title_link: note.url,
+        //   text: note.summary
+        // };
+        const folderName = note.folderName || "フォルダ未設定";
+        const attachment: MessageAttachment = {
+          color: "#327AC2",
+          blocks: [
+            {
+              type: "section",
+              text: {
                 type: "mrkdwn",
-                text: `*Author:*\n${note.author.realName}`
-              },
-              {
-                type: "mrkdwn",
-                text: `*Folder:*\n${folderName}`
-              },
-              {
-                type: "mrkdwn",
-                text: `*Group:*\n${note.groups.map((g:any)=>g.name).join(', ')}`
-              },
-              {
-                type: "mrkdwn",
-                text: `*Published at:*\n${note.publishedAt}`
-              },
-              {
-                type: "mrkdwn",
-                text: `*Updated at:*\n${note.updatedAt}`
-              },
-              {
-                type: "mrkdwn",
-                text: `*Comments:*\n${note.commentCount}`
+                text: `<${note.url}|*${note.title}*>`,
               }
-            ]
-          },
-          {
-            type: "section",
-            text: {
-              type: "plain_text",
-              text: note.summary
+            },
+            {
+              type: "section",
+              fields: [
+                {
+                  type: "mrkdwn",
+                  text: `*Author:*\n${note.author.realName}`
+                },
+                {
+                  type: "mrkdwn",
+                  text: `*Folder:*\n${folderName}`
+                },
+                {
+                  type: "mrkdwn",
+                  text: `*Group:*\n${note.groups.map((g:any)=>g.name).join(', ')}`
+                },
+                {
+                  type: "mrkdwn",
+                  text: `*Published at:*\n${note.publishedAt}`
+                },
+                {
+                  type: "mrkdwn",
+                  text: `*Updated at:*\n${note.updatedAt}`
+                },
+                {
+                  type: "mrkdwn",
+                  text: `*Comments:*\n${note.commentCount}`
+                }
+              ]
+            },
+            {
+              type: "section",
+              text: {
+                type: "plain_text",
+                text: note.summary
+              }
             }
-          }
-        ]
-      };
-      console.log(url, attachment);
-      return [url, attachment];
-    } else {
-      return [];
-    }
+          ]
+        };
+        console.log(url, attachment);
+        resolve([url, attachment]);
+      } else {
+        resolve([]);
+      }
+    }).catch(e => reject(e));
   });
 }
 
 app.event('link_shared', async({event, client}) => {
   const channel = event.channel;
   const messageTs = event.message_ts;
-  Promise.all(event.links.map(async (link) => getKibelaNoteUnfurlFromUrl(link.url as string).catch(e=>{console.log(e);return []}))).then(values => {
+  Promise.all(event.links.map(async (link) => getKibelaNoteUnfurlFromUrl(link.url as string))).then(values => {
     const unfurls = Object.fromEntries(values.filter(v => v.length > 0));
     const unfurlArgs: ChatUnfurlArguments = {
       channel: channel,
@@ -212,7 +214,7 @@ app.event('link_shared', async({event, client}) => {
     };
     console.log(JSON.stringify(unfurlArgs));
     client.chat.unfurl(unfurlArgs);
-  })
+  }).catch((e) => console.log(e));
 });
 
 (async () => {
