@@ -129,7 +129,7 @@ app.event('link_shared', async({event, client}) => {
     }).then((response) => {
       console.log(response);
       return response.json();
-    }).then((json) => console.log(json));
+    }).then((json) => console.log(JSON.stringify(json)));
   });
 });
 
