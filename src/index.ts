@@ -179,11 +179,11 @@ async function getKibelaNoteUnfurlFromUrl(url: string): Promise<[string, Message
               },
               {
                 type: "mrkdwn",
-                text: `*公開日:* ${note.publishedAt}`
+                text: `*公開日:* <!date^${Math.floor(Date.parse(note.publishedAt))}^{date_short}|${note.publishedAt}>`
               },
               {
                 type: "mrkdwn",
-                text: `*更新日:* ${note.contentUpdatedAt}`
+                text: `*更新日:* <!date^${Math.floor(Date.parse(note.contentUpdatedAt))}^{date_short}|${note.contentUpdatedAt}>`
               },
               {
                 type: "mrkdwn",
