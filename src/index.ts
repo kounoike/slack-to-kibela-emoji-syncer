@@ -26,13 +26,15 @@ const kibelaLinkDescriptionQuery = gql`
 query($path: String!) {
   note: noteFromPath(path: $path) {
     author {
-      id
-      account
-      avatarImage(size:MEDIUM) {
-        url
-      }
       realName
       url
+    }
+    contributors(first: 5) {
+      totalCount
+      nodes {
+        realName
+        url
+      }
     }
     folderName
     groups {
@@ -147,6 +149,10 @@ async function getKibelaNoteUnfurlFromUrl(url: string): Promise<[string, Message
       //   text: note.summary
       // };
       const folderName = note.folderName || "フォルダ未設定";
+      let contributors = note.contributors.nodes.map((c:any) => `<${c.url}|${c.realName}>`).join('/');
+      if (note.contributors.totalCount > 5) {
+        contributors = `${contributors} +${note.contributors.totalCount-5}人`;
+      }
       const attachment: MessageAttachment = {
         color: "#327AC2",
         blocks: [
@@ -168,6 +174,10 @@ async function getKibelaNoteUnfurlFromUrl(url: string): Promise<[string, Message
               {
                 type: "mrkdwn",
                 text: `*作成者:* ${note.author.realName}`
+              },
+              {
+                type: "mrkdwn",
+                text: `*編集者:* ${contributors}`
               },
               {
                 type: "mrkdwn",
