@@ -144,7 +144,7 @@ async function getKibelaNoteUnfurlFromUrl(url: string): Promise<[string, Message
             type: "section",
             text: {
               type: "mrkdwn",
-              text: `<(${note.url}|*${note.title}*>`,
+              text: `<${note.url}|*${note.title}*>`,
             }
           },
           {
