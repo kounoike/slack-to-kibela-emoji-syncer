@@ -151,7 +151,7 @@ async function getKibelaNoteUnfurlFromUrl(url: string): Promise<[string, Message
       //   title_link: note.url,
       //   text: note.summary
       // };
-      const folderName = `<!https://${kibelaTeam}.kibe.la${note.folder.path}|${note.folder.fullName}>` || "フォルダ未設定";
+      const folderName = note.folder ? `<!https://${kibelaTeam}.kibe.la${note.folder.path}|${note.folder.fullName}>` : "フォルダ未設定";
       const groups = note.groups.map((g:any)=>`<!https://${kibelaTeam}.kibe.la${g.path}|${g.name}>`).join(', ')
       let contributors = note.contributors.nodes.map((c:any) => `<${c.url}|${c.realName}>`).join('/');
       if (note.contributors.totalCount > 5) {
