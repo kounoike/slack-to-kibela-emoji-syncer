@@ -160,6 +160,15 @@ async function getKibelaNoteUnfurlFromUrl(url: string): Promise<[string, Message
             },
             fields: [
               {
+                type: "plain_text",
+                text: note.summary
+              }
+            ]
+          },
+          {
+            type: "context",
+            elements: [
+              {
                 type: "mrkdwn",
                 text: `*作成者:* ${note.author.realName}`
               },
@@ -184,13 +193,6 @@ async function getKibelaNoteUnfurlFromUrl(url: string): Promise<[string, Message
                 text: `*コメント数:* ${note.commentsCount}`
               }
             ]
-          },
-          {
-            type: "section",
-            text: {
-              type: "plain_text",
-              text: note.summary
-            }
           }
         ]
       };
