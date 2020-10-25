@@ -34,6 +34,11 @@ query($path: String!) {
       realName
       url
     }
+    folderName
+    groups {
+      name
+    }
+    commentCount
     id
     title
     url
@@ -137,6 +142,7 @@ async function getKibelaNoteUnfurlFromUrl(url: string): Promise<[string, Message
       //   title_link: note.url,
       //   text: note.summary
       // };
+      const folderName = note.folderName || "フォルダ未設定";
       const attachment: MessageAttachment = {
         color: "#327AC2",
         blocks: [
@@ -148,20 +154,31 @@ async function getKibelaNoteUnfurlFromUrl(url: string): Promise<[string, Message
             }
           },
           {
-            type: "context",
-            elements: [
+            type: "section",
+            fields: [
               {
                 type: "mrkdwn",
-                text: "*Author*"
+                text: `*Author:*\n${note.author.realName}`
               },
               {
-                type: "image",
-                image_url: note.author.avatarImage.url,
-                alt_text: note.author.realName
+                type: "mrkdwn",
+                text: `*Folder:*\n${folderName}`
               },
               {
-                type: "plain_text",
-                text: note.author.realName
+                type: "mrkdwn",
+                text: `*Group:*\n${note.groups.map((g:any)=>g.name).join(', ')}`
+              },
+              {
+                type: "mrkdwn",
+                text: `*Published at:*\n${note.publishedAt}`
+              },
+              {
+                type: "mrkdwn",
+                text: `*Updated at:*\n${note.updatedAt}`
+              },
+              {
+                type: "mrkdwn",
+                text: `*Comments:*\n${note.commentCount}`
               }
             ]
           },
