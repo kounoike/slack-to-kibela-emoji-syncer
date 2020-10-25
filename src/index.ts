@@ -28,9 +28,10 @@ query($path: String!) {
     author {
       id
       account
-      avatarImage {
+      avatarImage(size:MEDIUM) {
         url
       }
+      realName
       url
     }
     id
@@ -128,12 +129,50 @@ async function getKibelaNoteUnfurlFromUrl(url: string): Promise<[string, Message
   }).then((res) => res.json()).then((json) => {
     if (json.data) {
       const note = json.data.note;
+      // const attachment: MessageAttachment = {
+      //   author_icon: note.author.avatarImage.url,
+      //   author_name: note.author.account,
+      //   author_link: note.author.url,
+      //   title: note.title,
+      //   title_link: note.url,
+      //   text: note.summary
+      // };
       const attachment: MessageAttachment = {
-        author_icon: note.author.avatarImage.url,
-        author_name: note.author.account,
-        title: note.title,
-        title_link: note.url,
-        text: note.summary
+        color: "#327AC2",
+        blocks: [
+          {
+            type: "section",
+            text: {
+              type: "mrkdwn",
+              text: `<(${note.url}|*${note.title}*>`,
+            }
+          },
+          {
+            type: "context",
+            elements: [
+              {
+                type: "mrkdwn",
+                text: "*Author*"
+              },
+              {
+                type: "image",
+                image_url: note.author.avatarImage.url,
+                alt_text: note.author.realName
+              },
+              {
+                type: "plain_text",
+                text: note.author.realName
+              }
+            ]
+          },
+          {
+            type: "section",
+            text: {
+              type: "plain_text",
+              text: note.summary
+            }
+          }
+        ]
       };
       return [url, attachment];
     } else {
