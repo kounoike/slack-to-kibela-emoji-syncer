@@ -38,7 +38,7 @@ query($path: String!) {
     groups {
       name
     }
-    commentCount
+    commentsCount
     id
     title
     url
