@@ -152,6 +152,11 @@ async function getKibelaNoteUnfurlFromUrl(url: string): Promise<[string, Message
             text: {
               type: "mrkdwn",
               text: `<${note.url}|*${note.title}*>`,
+            },
+            accessory: {
+              type: "image",
+              image_url: "https://kibe.la/favicon.ico",
+              alt_text: "Kibela"
             }
           },
           {
@@ -159,27 +164,27 @@ async function getKibelaNoteUnfurlFromUrl(url: string): Promise<[string, Message
             fields: [
               {
                 type: "mrkdwn",
-                text: `*Author:*\n${note.author.realName}`
+                text: `*Author:*${note.author.realName}`
               },
               {
                 type: "mrkdwn",
-                text: `*Folder:*\n${folderName}`
+                text: `*Folder:*${folderName}`
               },
               {
                 type: "mrkdwn",
-                text: `*Group:*\n${note.groups.map((g:any)=>g.name).join(', ')}`
+                text: `*Group:*${note.groups.map((g:any)=>g.name).join(', ')}`
               },
               {
                 type: "mrkdwn",
-                text: `*Published at:*\n${note.publishedAt}`
+                text: `*Published at:*${note.publishedAt}`
               },
               {
                 type: "mrkdwn",
-                text: `*Updated at:*\n${note.updatedAt}`
+                text: `*Updated at:*${note.updatedAt}`
               },
               {
                 type: "mrkdwn",
-                text: `*Comments:*\n${note.commentCount}`
+                text: `*Comments:*${note.commentsCount}`
               }
             ]
           },
