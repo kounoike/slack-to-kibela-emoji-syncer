@@ -1,5 +1,5 @@
 {
-  "name": "bolt-on-heroku",
+  "name": "slack-kibela-emoji-syncer",
   "version": "1.0.0",
   "description": "Bolt app which runs on Heroku",
   "main": "index.js",
@@ -11,19 +11,20 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/seratch/bolt-on-heroku.git"
+    "url": "https://github.com/kounoike/slack-to-kibela-emoji-syncer.git"
   },
   "keywords": [
     "Slack",
     "Bolt",
-    "Heroku"
+    "Heroku",
+    "Kibela"
   ],
-  "author": "Kazuhiro Sera @seratch",
+  "author": "Kounoike Yuusuke @ko_noike",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/seratch/bolt-on-heroku/issues"
+    "url": "https://github.com/kounoike/slack-to-kibela-emoji-syncer/isues"
   },
-  "homepage": "https://github.com/seratch/bolt-on-heroku#readme",
+  "homepage": "https://github.com/kounoike/slack-to-kibela-emoji-syncer#readme",
   "dependencies": {
     "@msgpack/msgpack": "^2.3.0",
     "@slack/bolt": "^2.2.3",
