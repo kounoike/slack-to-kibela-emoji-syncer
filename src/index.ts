@@ -1,5 +1,5 @@
 import { App } from '@slack/bolt';
-
+import { LinkUnfurls, MessageAttachment } from '@slack/types';
 import fetch from "node-fetch";
 import gql from "graphql-tag";
 import { print as printGql } from "graphql/language/printer"
@@ -108,29 +108,46 @@ app.event('emoji_changed', async({event, client}) => {
   }
 });
 
-app.event('link_shared', async({event, client}) => {
-  event.links.forEach((link) => {
-    const url = link.url;
-    fetch(kibelaEndpoint, {
-      method: "POST",
-      redirect: "follow",
-      headers: {
-        Authorization: `Bearer ${kibelaToken}`,
-        "Content-Type": "application/json",
-        Accept: "application/json",
-        "User-Agent": userAgent
-      },
-      body: JSON.stringify({
-        query: printGql(kibelaLinkDescriptionQuery),
-        variables: {
-          path: url
-        }
-      })
-    }).then((response) => {
-      console.log(response);
-      return response.json();
-    }).then((json) => console.log(JSON.stringify(json)));
+async function getKibelaNoteUnfurlFromUrl(url: string): Promise<[string, MessageAttachment]|[]> {
+  return fetch(kibelaEndpoint, {
+    method: "POST",
+    redirect: "follow",
+    headers: {
+      Authorization: `Bearer ${kibelaToken}`,
+      "Content-Type": "application/json",
+      Accept: "application/json",
+      "User-Agent": userAgent
+    },
+    body: JSON.stringify({
+      query: printGql(kibelaLinkDescriptionQuery),
+      variables: {
+        path: url
+      }
+    })
+  }).then((res) => res.json()).then((json) => {
+    if (json.data) {
+      const note = json.data.note;
+      const attachment: MessageAttachment = {
+        author_icon: note.author.avatarImage.url,
+        author_name: note.author.account,
+        title: note.title,
+        title_link: note.url,
+        text: note.summary
+      };
+      return [url, attachment];
+    } else {
+      return [];
+    }
   });
+}
+
+app.event('link_shared', async({event, client}) => {
+  const channel = event.channel;
+  const messageTs = event.message_ts;
+  Promise.all(event.links.map(async (link) => getKibelaNoteUnfurlFromUrl(link.url as string))).then(values => {
+    const unfurls = Object.fromEntries(values.filter(v => v.length > 0));
+    console.log(unfurls);
+  })
 });
 
 (async () => {

@@ -27,6 +27,8 @@
   "dependencies": {
     "@msgpack/msgpack": "^2.3.0",
     "@slack/bolt": "^2.2.3",
+    "@slack/types": "^1.10.0",
+    "@slack/web-api": "^5.13.0",
     "@types/graphql": "^14.5.0",
     "@types/node": "<13",
     "@types/node-fetch": "^2.5.7",
