@@ -157,34 +157,31 @@ async function getKibelaNoteUnfurlFromUrl(url: string): Promise<[string, Message
               type: "image",
               image_url: "https://kibe.la/favicon.ico",
               alt_text: "Kibela"
-            }
-          },
-          {
-            type: "section",
+            },
             fields: [
               {
                 type: "mrkdwn",
-                text: `*Author:*${note.author.realName}`
+                text: `*作成者:* ${note.author.realName}`
               },
               {
                 type: "mrkdwn",
-                text: `*Folder:*${folderName}`
+                text: `*フォルダ:* ${folderName}`
               },
               {
                 type: "mrkdwn",
-                text: `*Group:*${note.groups.map((g:any)=>g.name).join(', ')}`
+                text: `*グループ:* ${note.groups.map((g:any)=>g.name).join(', ')}`
               },
               {
                 type: "mrkdwn",
-                text: `*Published at:*${note.publishedAt}`
+                text: `*公開日:* ${note.publishedAt}`
               },
               {
                 type: "mrkdwn",
-                text: `*Updated at:*${note.updatedAt}`
+                text: `*更新日:* ${note.updatedAt}`
               },
               {
                 type: "mrkdwn",
-                text: `*Comments:*${note.commentsCount}`
+                text: `*コメント数:* ${note.commentsCount}`
               }
             ]
           },
