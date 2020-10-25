@@ -21,6 +21,26 @@ mutation($code: String!, $url: String!) {
 }
 `
 
+const kibelaLinkDescriptionQuery = gql`
+query($path: String!) {
+  note: noteFromPath(path: $path) {
+    author {
+      id
+      account
+      avatarImage {
+        url
+      }
+      url
+    }
+    id
+    title
+    url
+    publishedAt
+    summary: contentSummaryHtml
+  }
+}
+`
+
 async function createEmoji(code: string, imageUrl: string) {
   return imageDataURI.encodeFromURL(imageUrl).then((datauri: string) => {
     console.log(`${code}: ${imageUrl} : ${datauri.slice(0, 60)}`);
@@ -89,6 +109,27 @@ app.event('emoji_changed', async({event, client}) => {
 });
 
 app.event('link_shared', async({event, client}) => {
+  event.links.forEach((link) => {
+    const url = link.url;
+    fetch(kibelaEndpoint, {
+      method: "POST",
+      redirect: "follow",
+      headers: {
+        Authorization: `Bearer ${kibelaToken}`,
+        "Content-Type": "application/json",
+        Accept: "application/json",
+        "User-Agent": userAgent
+      },
+      body: JSON.stringify({
+        query: printGql(kibelaLinkDescriptionQuery),
+        variables: {
+          path: url
+        }
+      })
+    }).then((response) => {
+      console.log(response);
+    })
+  });
   console.log(event, client);
 });
 

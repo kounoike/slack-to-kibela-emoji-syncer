@@ -41,6 +41,8 @@ https://api.slack.com/apps
     * "channels:history"
     * "chat:write"
     * "emoji:read"
+    * "link:read"
+    * "link:write"
   * Click "Save Changes"
 * Features > Bot User:
   * Click "Add a Bot User"
@@ -79,6 +81,9 @@ npm run local
   * Subscribe to Workspace Events:
     * Add "message.channels"
     * Add "emoji_changed"
+    * Add "link_shared"
+  * Add unfurl domains
+    * Add "kibe.la"
   * Click "Save Changes"
 
 ### Try the Slack App
