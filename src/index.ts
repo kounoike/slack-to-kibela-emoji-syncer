@@ -43,6 +43,7 @@ query($path: String!) {
     title
     url
     publishedAt
+    updatedAt
     summary: contentSummaryHtml
   }
 }
