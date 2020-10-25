@@ -132,7 +132,7 @@ async function getKibelaNoteUnfurlFromUrl(url: string): Promise<[string, Message
         path: url
       }
     })
-  }).then((res) => res.json()).then((json) => {
+  }).then((res) => res.json()).catch((e) => console.log(e)).then((json) => {
     if (json.data) {
       const note = json.data.note;
       // const attachment: MessageAttachment = {
