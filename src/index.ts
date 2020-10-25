@@ -191,7 +191,7 @@ app.event('link_shared', async({event, client}) => {
       ts: messageTs,
       unfurls: unfurls
     };
-    console.log(unfurlArgs);
+    console.log(JSON.stringify(unfurlArgs));
     client.chat.unfurl(unfurlArgs);
   })
 });
