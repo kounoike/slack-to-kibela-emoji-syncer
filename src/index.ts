@@ -115,7 +115,7 @@ app.message(/emoji sync/, async ({ message, context, say }) => {
 app.event('emoji_changed', async({event, client, context}) => {
   try {
     if(event.subtype === "add") {
-      if(event.name && event.value) {
+      if(event.name && event.value && !event.value.startsWith("alias:")) {
         console.log(`creating ${event.name} emoji....`);
         await createEmoji(event.name, event.value);
         console.log(`create ${event.name} emoji done.`);
@@ -123,7 +123,24 @@ app.event('emoji_changed', async({event, client, context}) => {
           token: context.botToken,
           channel: emojiChannel,
           mrkdwn: true,
-          text: `新しい絵文字: \`:${event.name}:\` が登録されました。`
+          text: "",
+          attachments: [
+            {
+              blocks: [
+                {
+                  type: "section",
+                  text: {
+                    type: "mrkdwn",
+                    text: `新しい絵文字: \`:${event.name}:\` が登録されました。`,
+                  },
+                  accessory: {
+                    type: "image",
+                    image_url: event.value
+                  }
+                }
+              ]
+            }
+          ]
         })
         const result2 = await app.client.chat.postMessage({
           token: context.botToken,
