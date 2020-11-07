@@ -4,6 +4,21 @@ import fetch from "node-fetch";
 import gql from "graphql-tag";
 import { print as printGql } from "graphql/language/printer"
 import { ChatUnfurlArguments } from '@slack/web-api';
+
+// const kuromoji = require('kuromoji')
+import * as kuromoji from 'kuromoji'
+const D3Node = require('d3-node')
+const d3 = require('d3')
+const cloud = require('d3-cloud')
+const { JSDOM } = require('jsdom')
+const Canvas = require('canvas')
+const fs = require('fs')
+const fabric = require('fabric').fabric
+
+const dicPath = './node_modules/kuromoji/dict'
+const targetPosList = ['名詞', '固有名詞'];
+
+
 const imageDataURI = require("image-data-uri");
 
 const emojiChannel = process.env.EMOJI_CHANNEL || "#emoji";
@@ -55,6 +70,7 @@ query($path: String!) {
     publishedAt
     contentUpdatedAt
     summary: contentSummaryHtml
+    content: contentHtml
   }
 }
 `
@@ -151,6 +167,94 @@ app.event('emoji_changed', async({event, client, context}) => {
   }
 });
 
+async function getWordCloudDataURI(content: string): Promise<string> {
+  return new Promise((resolve, reject) => {
+    kuromoji.builder({dicPath}).build((err: any, tokenizer: any) => {
+        if (err) {
+            console.log(err)
+            reject(err)
+        }
+        const tokens = tokenizer.tokenize(content)
+        const words = tokens
+        .filter((t:any) => targetPosList.includes(t.pos))
+        .map((t:any) => t.basic_form === '*' ? t.surface_form : t.basic_form)
+        // [{text: 単語, value: 出現回数}]の形にReduce
+        .reduce((data:any[], text:string) => {
+            const target = data.find(c => c.text === text)
+            if(target) {
+            target.value = target.value + 1
+            } else {
+            data.push({
+                text,
+                value: 1,
+            })
+            }
+            return data
+        }, [])
+        .filter((t:any) => t.text.length > 1)
+        // console.log(JSON.stringify(words))
+        // const sumWords = words.map((w) => w.value).reduce((a, b) => a + b)
+        const maxWords = Math.max(...words.map((w:any) => w.value))
+        const sortByRatioWords = words.map((w:any) => {
+            return {
+                ...w,
+                ratio: w.value / maxWords
+            }
+        })
+        .sort((a:any, b:any) => {
+            if (a.ratio * a.text.length > b.ratio * b.text.length) return -1
+            if (a.ratio * a.text.length < b.ratio * b.text.length) return 1
+            return 0
+        })
+
+        const w = 500
+        const h = 500
+        Canvas.registerFont("./sazanami-gothic.ttf", {family: 'Impact'})
+        cloud().size([w, h])
+        .canvas(() => Canvas.createCanvas(1, 1))
+        .words(sortByRatioWords)
+        .padding(5)
+        .font("Impact")
+        .fontSize((word:any) => 30 + word.ratio * 70)
+        .rotate((word:any) => word.value % 2 === 1 ? 0 : 90)
+        .on("end", ((words:any) => {
+            // console.log(JSON.stringify(words))
+            const d3n = new D3Node({canvasModule: Canvas})
+            d3n.options.canvasModule.registerFont("./sazanami-gothic.ttf", {family: 'Impact'})
+
+            d3n
+            .createSVG(w, h)
+            .append("svg")
+                .attr("class", "ui fluid image") // style using semantic ui
+                .attr("viewBox", "0 0 " + w + " " + h )  // ViewBox : x, y, width, height
+                .attr("width", "100%")    // 表示サイズの設定
+                .attr("height", "100%")   // 表示サイズの設定
+            .append("g")
+                .attr("transform", "translate(" + w / 2 + "," + h / 2 + ")")
+            .selectAll("text")
+                .data(words)
+            .enter().append("text")
+                .style("font-size", function(d:any) { return d.size + "px"; })
+                .style("font-family", "Impact")
+                .style("fill", function(d:any, i:number) { return d3.schemeCategory10[i % 10]; })
+                .attr("text-anchor", "middle")
+                .attr("transform", function(d:any) {
+                return "translate(" + [d.x, d.y] + ")rotate(" + d.rotate + ")";
+                })
+            .text(function(d:any) { return d.text; })
+            require('./src/lib/output')('test', d3n)
+            const fabricCanvas = new fabric.Canvas(null, {width: w, height: h})
+            fabric.loadSVGFromString(d3n.svgString(), (objects:any, options:any) => {
+                fabricCanvas.add(fabric.util.groupSVGElements(objects)).renderAll()
+                resolve(fabricCanvas.toDataURL())
+            })
+            reject("error?")
+        }))
+        .start()
+    })
+  })
+}
+
 //test
 async function getKibelaNoteUnfurlFromUrl(url: string): Promise<[string, MessageAttachment]|[]> {
   return fetch(kibelaEndpoint, {
@@ -168,7 +272,7 @@ async function getKibelaNoteUnfurlFromUrl(url: string): Promise<[string, Message
         path: url
       }
     })
-  }).then((res) => res.json()).then((json) => {
+  }).then((res) => res.json()).then(async (json) => {
     if (json.data) {
       const note = json.data.note;
       // const attachment: MessageAttachment = {
@@ -185,6 +289,8 @@ async function getKibelaNoteUnfurlFromUrl(url: string): Promise<[string, Message
       if (note.contributors.totalCount > 5) {
         contributors = `${contributors} +${note.contributors.totalCount-5}人`;
       }
+      const imageUrl = await getWordCloudDataURI(note.content)
+      console.log("imageUrl: ", imageUrl)
       const attachment: MessageAttachment = {
         color: "#327AC2",
         blocks: [
@@ -196,7 +302,7 @@ async function getKibelaNoteUnfurlFromUrl(url: string): Promise<[string, Message
             },
             accessory: {
               type: "image",
-              image_url: "https://kibe.la/favicon.ico",
+              image_url: imageUrl,
               alt_text: "Kibela"
             }
           },
