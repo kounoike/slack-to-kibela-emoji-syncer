@@ -102,8 +102,12 @@ async function createEmoji(code: string, imageUrl: string) {
 
 const receiver = new ExpressReceiver({signingSecret: process.env.SLACK_SIGNING_SECRET || ""})
 
-
-
+receiver.app.use(async (req, res, next) => {
+  console.log("USE IN EXPRESS!!!!!", JSON.stringify([req, res]));
+  console.log(req.hostname);
+  console.log(req.protocol);
+  return await next();
+});
 
 const app = new App({
   token: process.env.SLACK_BOT_TOKEN,
