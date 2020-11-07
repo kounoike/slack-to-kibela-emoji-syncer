@@ -288,8 +288,7 @@ async function getKibelaNoteUnfurlFromUrl(url: string): Promise<[string, Message
       if (note.contributors.totalCount > 5) {
         contributors = `${contributors} +${note.contributors.totalCount-5}人`;
       }
-      const imageUrl = await getWordCloudDataURI(note.content)
-      console.log("imageUrl: ", imageUrl.slice(0, 100))
+      // const imageUrl = await getWordCloudDataURI(note.content)
       const attachment: MessageAttachment = {
         color: "#327AC2",
         blocks: [
@@ -301,7 +300,7 @@ async function getKibelaNoteUnfurlFromUrl(url: string): Promise<[string, Message
             },
             accessory: {
               type: "image",
-              image_url: imageUrl,
+              image_url: "https://kibe.la/favicon.ico",
               alt_text: "Kibela"
             }
           },
