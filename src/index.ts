@@ -248,7 +248,6 @@ async function getWordCloudDataURI(content: string): Promise<string> {
                 fabricCanvas.add(fabric.util.groupSVGElements(objects)).renderAll()
                 resolve(fabricCanvas.toDataURL())
             })
-            reject("error?")
         }))
         .start()
     })
