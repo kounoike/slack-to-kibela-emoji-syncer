@@ -105,7 +105,7 @@ const receiver = new ExpressReceiver({signingSecret: process.env.SLACK_SIGNING_S
 let serverHostName = "";
 
 receiver.app.post('/slack/events', (req, res, next) => {
-  console.log("!!!EXPRESS ROUTER APP");
+  console.log("!!!EXPRESS ROUTER APP POST EVENTS");
   console.log(req.hostname);
   serverHostName = req.hostname;
   req.url = '/slack/events';
