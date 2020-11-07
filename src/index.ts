@@ -101,6 +101,10 @@ async function createEmoji(code: string, imageUrl: string) {
 }
 
 const receiver = new ExpressReceiver({signingSecret: process.env.SLACK_SIGNING_SECRET || ""})
+
+
+
+
 const app = new App({
   token: process.env.SLACK_BOT_TOKEN,
   receiver
@@ -370,8 +374,9 @@ app.event('link_shared', async({event, client}) => {
   }).catch((e) => console.log(e));
 });
 
-receiver.router.get('/wordcloud', (req, res) => {
+receiver.router.get('/test', (req, res) => {
   receiver.app.set("a", "")
+  res.send("testtest")
 });
 
 receiver.router.post('/events', (req, res, next) => {
