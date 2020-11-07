@@ -142,7 +142,7 @@ app.event('emoji_changed', async({event, client, context}) => {
             }
           ]
         });
-        console.log("result", result);
+        console.log("result", JSON.stringify(result));
       }
     }
   } catch (error) {
