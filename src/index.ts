@@ -243,7 +243,6 @@ async function getWordCloudDataURI(content: string): Promise<string> {
                 return "translate(" + [d.x, d.y] + ")rotate(" + d.rotate + ")";
                 })
             .text(function(d:any) { return d.text; })
-            require('./src/lib/output')('test', d3n)
             const fabricCanvas = new fabric.Canvas(null, {width: w, height: h})
             fabric.loadSVGFromString(d3n.svgString(), (objects:any, options:any) => {
                 fabricCanvas.add(fabric.util.groupSVGElements(objects)).renderAll()
