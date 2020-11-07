@@ -115,6 +115,17 @@ if (process.env.DEBUG) {
     return await args.next();
   });
 }
+
+receiver.app.use((req, res, next) => {
+  receiver.app.set("protocol", req.protocol);
+  receiver.app.set("hostname", req.hostname);
+  console.log("req", req);
+  console.log("baseurl", req.baseUrl);
+  console.log("protocol", req.baseUrl);
+  console.log("hostname", req.baseUrl);
+  next();
+});
+
 app.message(/hello/, async ({ message, say }) => {
   // say() sends a message to the channel where the event was triggered
   await say(`Hey there <@${message.user}>!`);
@@ -377,16 +388,6 @@ app.event('link_shared', async({event, client}) => {
 receiver.router.get('/test', (req, res) => {
   receiver.app.set("a", "")
   res.send("testtest")
-});
-
-receiver.app.use((req, res, next) => {
-  receiver.app.set("protocol", req.protocol);
-  receiver.app.set("hostname", req.hostname);
-  console.log("req", req);
-  console.log("baseurl", req.baseUrl);
-  console.log("protocol", req.baseUrl);
-  console.log("hostname", req.baseUrl);
-  next();
 });
 
 (async () => {
