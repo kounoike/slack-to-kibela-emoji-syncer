@@ -7,6 +7,7 @@ import { ChatUnfurlArguments } from '@slack/web-api';
 
 // const kuromoji = require('kuromoji')
 import * as kuromoji from 'kuromoji'
+import { isConstructorDeclaration } from 'typescript';
 const D3Node = require('d3-node')
 const d3 = require('d3')
 const cloud = require('d3-cloud')
@@ -101,12 +102,16 @@ async function createEmoji(code: string, imageUrl: string) {
 }
 
 const receiver = new ExpressReceiver({signingSecret: process.env.SLACK_SIGNING_SECRET || "", endpoints: "/real_slack/events"})
+let serverHostName = "";
 
 receiver.app.post('/slack/events', (req, res, next) => {
-  console.log("USE IN EXPRESS!!!!!", req, res);
-  console.log(req.hostname);
-  console.log(req.protocol);
+  serverHostName = req.hostname;
   next();
+});
+receiver.router.use((req, res, next) => {
+  console.log("!!!EXPRESS ROUTER APP");
+  console.log(req.hostname);
+  next()
 });
 
 const app = new App({
@@ -119,10 +124,6 @@ if (process.env.DEBUG) {
     return await args.next();
   });
 }
-app.use(async (args: any) => {
-  console.log("USE!!!!!", JSON.stringify(args))
-  return await args.next();
-});
 
 app.message(/hello/, async ({ message, say }) => {
   // say() sends a message to the channel where the event was triggered
