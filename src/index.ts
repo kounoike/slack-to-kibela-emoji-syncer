@@ -191,7 +191,8 @@ async function getWordCloudDataURI(content: string): Promise<string> {
             }
             return data
         }, [])
-        .filter((t:any) => t.text.length > 1)
+        // .filter((t:any) => t.text.length > 1)
+        .slice(0, 100)
         // console.log(JSON.stringify(words))
         // const sumWords = words.map((w) => w.value).reduce((a, b) => a + b)
         const maxWords = Math.max(...words.map((w:any) => w.value))
