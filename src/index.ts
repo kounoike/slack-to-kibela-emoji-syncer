@@ -301,7 +301,7 @@ async function getKibelaNoteUnfurlFromUrl(url: string): Promise<[string, Message
             },
             accessory: {
               type: "image",
-              image_url: "https://kibe.la/favicon.ico",
+              image_url: "/test.png",
               alt_text: "Kibela"
             }
           },
@@ -353,8 +353,7 @@ async function getKibelaNoteUnfurlFromUrl(url: string): Promise<[string, Message
   });
 }
 
-app.event('link_shared', async({context, event, client}) => {
-  console.log("****context*****", context);
+app.event('link_shared', async({event, client}) => {
   const channel = event.channel;
   const messageTs = event.message_ts;
   Promise.all(event.links.map(async (link) => getKibelaNoteUnfurlFromUrl(link.url as string))).then(values => {
