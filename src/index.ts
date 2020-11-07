@@ -171,7 +171,7 @@ async function getWordCloudDataURI(content: string): Promise<string> {
   return new Promise((resolve, reject) => {
     kuromoji.builder({dicPath}).build((err: any, tokenizer: any) => {
         if (err) {
-            console.log(err)
+            console.log("kuromoji error:", err)
             reject(err)
         }
         const tokens = tokenizer.tokenize(content)
