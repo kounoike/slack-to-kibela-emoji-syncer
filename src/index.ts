@@ -371,7 +371,14 @@ app.event('link_shared', async({event, client}) => {
 });
 
 receiver.router.get('/wordcloud', (req, res) => {
-  res.send("test")
+  receiver.app.set("a", "")
+});
+
+receiver.router.post('/events', (req, res, next) => {
+  receiver.app.set("protocol", req.protocol);
+  receiver.app.set("hostname", req.hostname);
+  console.log("baseurl", req.baseUrl);
+  next('/slack/events');
 });
 
 (async () => {
