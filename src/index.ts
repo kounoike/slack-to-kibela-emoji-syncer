@@ -379,11 +379,13 @@ receiver.router.get('/test', (req, res) => {
   res.send("testtest")
 });
 
-receiver.router.post('/events', (req, res, next) => {
+receiver.app.use((req, res, next) => {
   receiver.app.set("protocol", req.protocol);
   receiver.app.set("hostname", req.hostname);
   console.log("baseurl", req.baseUrl);
-  next('/slack/events');
+  console.log("protocol", req.baseUrl);
+  console.log("hostname", req.baseUrl);
+  next();
 });
 
 (async () => {
