@@ -101,13 +101,9 @@ async function createEmoji(code: string, imageUrl: string) {
   })
 }
 
-const receiver = new ExpressReceiver({signingSecret: process.env.SLACK_SIGNING_SECRET || "", endpoints: "/real_slack/events"})
+const receiver = new ExpressReceiver({signingSecret: process.env.SLACK_SIGNING_SECRET || ""})
 let serverHostName = "";
 
-receiver.app.post('/slack/events', (req, res, next) => {
-  serverHostName = req.hostname;
-  next();
-});
 receiver.router.use(async (req, res, next) => {
   console.log("!!!EXPRESS ROUTER APP");
   console.log(req.hostname);
