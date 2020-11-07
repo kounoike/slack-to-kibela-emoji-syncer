@@ -382,6 +382,7 @@ receiver.router.get('/test', (req, res) => {
 receiver.app.use((req, res, next) => {
   receiver.app.set("protocol", req.protocol);
   receiver.app.set("hostname", req.hostname);
+  console.log("req", req);
   console.log("baseurl", req.baseUrl);
   console.log("protocol", req.baseUrl);
   console.log("hostname", req.baseUrl);
