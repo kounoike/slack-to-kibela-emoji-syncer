@@ -6,7 +6,7 @@ import { print as printGql } from "graphql/language/printer"
 import { ChatUnfurlArguments } from '@slack/web-api';
 const imageDataURI = require("image-data-uri");
 
-const emojiChannel = process.env.EMOJI_CHANNEL || "";
+const emojiChannel = process.env.EMOJI_CHANNEL || "#emoji";
 const kibelaTeam = process.env.KIBELA_TEAM;
 const kibelaToken = process.env.KIBELA_TOKEN;
 const kibelaEndpoint = `https://${kibelaTeam}.kibe.la/api/v1`;
