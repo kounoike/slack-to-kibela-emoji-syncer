@@ -100,13 +100,13 @@ async function createEmoji(code: string, imageUrl: string) {
   })
 }
 
-const receiver = new ExpressReceiver({signingSecret: process.env.SLACK_SIGNING_SECRET || ""})
+const receiver = new ExpressReceiver({signingSecret: process.env.SLACK_SIGNING_SECRET || "", endpoints: "/real_slack/events"})
 
-receiver.app.use(async (req, res, next) => {
+receiver.app.post('/slack/events', (req, res, next) => {
   console.log("USE IN EXPRESS!!!!!", JSON.stringify([req, res]));
   console.log(req.hostname);
   console.log(req.protocol);
-  return await next();
+  next();
 });
 
 const app = new App({
