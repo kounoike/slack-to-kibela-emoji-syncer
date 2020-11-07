@@ -116,7 +116,7 @@ if (process.env.DEBUG) {
   });
 }
 app.use(async (args: any) => {
-  console.log("USE!!!!!", args)
+  console.log("USE!!!!!", JSON.stringify(args))
   return await args.next();
 });
 
