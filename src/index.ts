@@ -6,6 +6,7 @@ import { print as printGql } from "graphql/language/printer"
 import { ChatUnfurlArguments } from '@slack/web-api';
 const imageDataURI = require("image-data-uri");
 
+const emojiChannel = process.env.EMOJI_CHANNEL || "";
 const kibelaTeam = process.env.KIBELA_TEAM;
 const kibelaToken = process.env.KIBELA_TOKEN;
 const kibelaEndpoint = `https://${kibelaTeam}.kibe.la/api/v1`;
@@ -111,14 +112,20 @@ app.message(/emoji sync/, async ({ message, context, say }) => {
   }
 });
 
-app.event('emoji_changed', async({event, client}) => {
+app.event('emoji_changed', async({event, client, context}) => {
   try {
     if(event.subtype === "add") {
       if(event.name && event.value) {
         console.log(`creating ${event.name} emoji....`);
         await createEmoji(event.name, event.value);
         console.log(`create ${event.name} emoji done.`);
-      }
+        const result = await app.client.chat.postMessage({
+          token: context.botToken,
+          channel: emojiChannel,
+          text: `新しい絵文字：${event.name}が登録されました`,
+          icon_emoji: `:${event.nmame}:`
+        })
+        }
     }
   } catch (error) {
     console.log(error);
