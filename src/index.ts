@@ -231,15 +231,17 @@ async function getWordCloudImageURI(content: string): Promise<string> {
             }
         })
 
-        const w = 500
-        const h = 500
+        const w = 420
+        const h = 180
+        const fontSize = 40
+        const padding = 2
         Canvas.registerFont("./sazanami-gothic.ttf", {family: 'Impact'})
         cloud().size([w, h])
         .canvas(() => Canvas.createCanvas(1, 1))
         .words(sortByRatioWords)
-        .padding(5)
+        .padding(padding)
         .font("Impact")
-        .fontSize((word:any) => 50 + word.ratio * 100)
+        .fontSize((word:any) => fontSize/2 + word.ratio * fontSize/2)
         .rotate((word:any) => word.count % 2 === 1 ? 0 : 90)
         .on("end", ((words:any) => {
             // console.log(JSON.stringify(words))
@@ -319,13 +321,13 @@ async function getKibelaNoteUnfurlFromUrl(url: string): Promise<[string, Message
             type: "section",
             text: {
               type: "mrkdwn",
-              text: `<${note.url}|*${note.title}*>\n\n${note.summary}`,
+              text: `Kibela記事 | <${note.url}|*${note.title}*>`,
             },
-            accessory: {
+          },
+          {
               type: "image",
               image_url: `https://${serverHostName}/wordcloud/${encodeURI(note.id)}.png`,
               alt_text: "Kibela"
-            }
           },
           {
             type: "context",
