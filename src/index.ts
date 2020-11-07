@@ -108,10 +108,10 @@ receiver.app.post('/slack/events', (req, res, next) => {
   serverHostName = req.hostname;
   next();
 });
-receiver.router.use((req, res, next) => {
+receiver.router.use(async (req, res, next) => {
   console.log("!!!EXPRESS ROUTER APP");
   console.log(req.hostname);
-  next()
+  await next();
 });
 
 const app = new App({
