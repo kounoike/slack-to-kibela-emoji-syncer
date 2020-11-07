@@ -115,15 +115,9 @@ if (process.env.DEBUG) {
     return await args.next();
   });
 }
-
-receiver.app.use((req, res, next) => {
-  receiver.app.set("protocol", req.protocol);
-  receiver.app.set("hostname", req.hostname);
-  console.log("req", req);
-  console.log("baseurl", req.baseUrl);
-  console.log("protocol", req.baseUrl);
-  console.log("hostname", req.baseUrl);
-  next();
+app.use(async (args: any) => {
+  console.log("USE!!!!!", args)
+  return await args.next();
 });
 
 app.message(/hello/, async ({ message, say }) => {
@@ -369,7 +363,6 @@ async function getKibelaNoteUnfurlFromUrl(url: string): Promise<[string, Message
 }
 
 app.event('link_shared', async({event, client}) => {
-  console.log(process.env)
   const channel = event.channel;
   const messageTs = event.message_ts;
   Promise.all(event.links.map(async (link) => getKibelaNoteUnfurlFromUrl(link.url as string))).then(values => {
