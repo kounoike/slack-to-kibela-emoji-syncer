@@ -344,7 +344,7 @@ async function getKibelaNoteUnfurlFromUrl(url: string): Promise<[string, Message
           }
         ]
       };
-      console.log(url, attachment);
+      console.log(url, JSON.stringify(attachment).slice(0, 200));
       return [url, attachment];
     } else {
       console.log(`query error?: ${JSON.stringify(json)}`);
