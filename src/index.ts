@@ -354,7 +354,7 @@ async function getKibelaNoteUnfurlFromUrl(url: string): Promise<[string, Message
 }
 
 app.event('link_shared', async({context, event, client}) => {
-  console.log(context);
+  console.log("****context*****", context);
   const channel = event.channel;
   const messageTs = event.message_ts;
   Promise.all(event.links.map(async (link) => getKibelaNoteUnfurlFromUrl(link.url as string))).then(values => {
