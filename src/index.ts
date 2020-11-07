@@ -21,7 +21,7 @@ const fabric = require('fabric').fabric
 const dicPath = './node_modules/kuromoji/dict'
 // const targetPosList = ['名詞', '形容詞', '動詞'];
 const targetPosList = ['名詞'];
-const ngWords = ['https', '://', '[', ']', '@', 'co', 'jp', 'com', '/', 'in', "もの","これ","ため","それ","ところ","よう", "の", "こと", "とき"]
+const ngWords = ['https', '://', '[', ']', '@', 'co', 'jp', 'com', '/', 'in', "もの","これ","ため","それ","ところ","よう", "の", "こと", "とき", "ん"]
 
 
 const imageDataURI = require("image-data-uri");
