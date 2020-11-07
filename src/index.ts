@@ -290,7 +290,7 @@ async function getKibelaNoteUnfurlFromUrl(url: string): Promise<[string, Message
         contributors = `${contributors} +${note.contributors.totalCount-5}人`;
       }
       const imageUrl = await getWordCloudDataURI(note.content)
-      console.log("imageUrl: ", imageUrl)
+      console.log("imageUrl: ", imageUrl.slice(0, 100))
       const attachment: MessageAttachment = {
         color: "#327AC2",
         blocks: [
