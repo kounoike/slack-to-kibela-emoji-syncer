@@ -135,7 +135,8 @@ app.event('emoji_changed', async({event, client, context}) => {
                   },
                   accessory: {
                     type: "image",
-                    image_url: event.value
+                    image_url: event.value,
+                    alt_text: event.name
                   }
                 }
               ]
