@@ -25,6 +25,10 @@
         "KIBELA_TOKEN": {
             "description": "Kibela API Token",
             "value": "secret/**/*******/*****************************"
+        },
+        "EMOJI_CHANNEL": {
+            "description": "Emoji Channel",
+            "value": "#emoji"
         }
     },
     "image": "heroku/nodejs"
