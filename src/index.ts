@@ -123,8 +123,13 @@ app.event('emoji_changed', async({event, client, context}) => {
           token: context.botToken,
           channel: emojiChannel,
           mrkdwn: true,
-          text: `新しい絵文字: \`:${event.name}:\` が登録されました。\n:${event.name}:`,
-          icon_emoji: `:${event.nmame}:`
+          text: `新しい絵文字: \`:${event.name}:\` が登録されました。`
+        })
+        const result2 = await app.client.chat.postMessage({
+          token: context.botToken,
+          channel: emojiChannel,
+          mrkdwn: true,
+          text: `:${event.name}:`
         })
         }
     }
