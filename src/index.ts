@@ -146,7 +146,7 @@ app.event('emoji_changed', async({event, client, context}) => {
       }
     }
   } catch (error) {
-    console.log(error);
+    console.log(JSON.stringify(error));
   }
 });
 
