@@ -1,4 +1,4 @@
-import { App } from '@slack/bolt';
+import { App, ExpressReceiver } from '@slack/bolt';
 import { LinkUnfurls, MessageAttachment } from '@slack/types';
 import fetch from "node-fetch";
 import gql from "graphql-tag";
@@ -100,9 +100,10 @@ async function createEmoji(code: string, imageUrl: string) {
   })
 }
 
+const receiver = new ExpressReceiver({signingSecret: process.env.SLACK_SIGNING_SECRET || ""})
 const app = new App({
   token: process.env.SLACK_BOT_TOKEN,
-  signingSecret: process.env.SLACK_SIGNING_SECRET
+  receiver
 });
 if (process.env.DEBUG) {
   app.use(async (args: any) => {
@@ -366,6 +367,10 @@ app.event('link_shared', async({event, client}) => {
     console.log(JSON.stringify(unfurlArgs));
     client.chat.unfurl(unfurlArgs);
   }).catch((e) => console.log(e));
+});
+
+receiver.router.get('/wordcloud', (req, res) => {
+  res.send("test")
 });
 
 (async () => {
