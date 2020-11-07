@@ -131,7 +131,7 @@ app.event('emoji_changed', async({event, client, context}) => {
                   type: "section",
                   text: {
                     type: "mrkdwn",
-                    text: `新しい絵文字: \`:${event.name}:\` が登録されました。`,
+                    text: `新しい絵文字: :${event.name}: \`:${event.name}:\` が登録されました。`,
                   },
                   accessory: {
                     type: "image",
@@ -141,14 +141,9 @@ app.event('emoji_changed', async({event, client, context}) => {
               ]
             }
           ]
-        })
-        const result2 = await app.client.chat.postMessage({
-          token: context.botToken,
-          channel: emojiChannel,
-          mrkdwn: true,
-          text: `:${event.name}:`
-        })
-        }
+        });
+        console.log("result", result);
+      }
     }
   } catch (error) {
     console.log(error);
