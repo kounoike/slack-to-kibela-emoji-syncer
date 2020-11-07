@@ -21,7 +21,7 @@ const fabric = require('fabric').fabric
 const dicPath = './node_modules/kuromoji/dict'
 // const targetPosList = ['名詞', '形容詞', '動詞'];
 const targetPosList = ['名詞'];
-const ngWords = ['https', '://', '[', ']', '@', 'co', 'jp', 'com', '/', 'in', "もの","これ","ため","それ","ところ","よう"]
+const ngWords = ['https', '://', '[', ']', '@', 'co', 'jp', 'com', '/', 'in', "もの","これ","ため","それ","ところ","よう", "の", "こと", "とき"]
 
 
 const imageDataURI = require("image-data-uri");
@@ -396,7 +396,7 @@ let wordCloudResultCache = new LRU(100);
 
 receiver.router.get('/wordcloud/:noteId.png', (req, res) => {
   const noteId = req.params.noteId;
-  console.log("wordcloud", noteId, req.headers["if-modified-since"]);
+  console.log("wordcloud", noteId, "LRU:", wordCloudResultCache.length);
   // if(!!req.headers["if-modified-since"]){
   //   console.log("cached");
   //   res.status(304);
