@@ -1,12 +1,12 @@
 import fs from 'fs';
 import express from 'express';
 import bodyParser from 'body-parser';
-import { App, ExpressReceiver } from '@slack/bolt';
+import { App, ExpressReceiver, LinkSharedEvent } from '@slack/bolt';
 import { LinkUnfurls, MessageAttachment } from '@slack/types';
 import fetch from "node-fetch";
 import gql from "graphql-tag";
 import { print as printGql } from "graphql/language/printer"
-import { ChatUnfurlArguments } from '@slack/web-api';
+import { ChatUnfurlArguments, WebClient } from '@slack/web-api';
 const {htmlToText} = require('html-to-text');
 const LRU = require('lru');
 const jspngopt = require("jspngopt");
@@ -103,6 +103,14 @@ query($path: String!) {
   }
 }
 `;
+
+const wordCloudResultCache = new LRU(numImageCaches);
+wordCloudResultCache.on('evict', (e:{key:string, value:any}) => {
+  console.warn(`LRU Cache evicted: ${e.key}`)
+});
+const generatingWordClouds: any = {}; 
+
+const pngOptimizer = new jspngopt.Optimizer();
 
 async function createEmoji(code: string, imageUrl: string) {
   return imageDataURI.encodeFromURL(imageUrl).then((datauri: string) => {
@@ -297,7 +305,8 @@ async function getWordCloudImage(content: string): Promise<Buffer> {
 }
 
 //test
-async function getKibelaNoteUnfurlFromUrl(url: string): Promise<[string, MessageAttachment]|[]> {
+async function unfurlKibelaNoteFromUrl(url: string, event: LinkSharedEvent, client: WebClient) {
+  console.log(`get kibela note from ${url}`);
   return fetch(kibelaEndpoint, {
     method: "POST",
     redirect: "follow",
@@ -316,7 +325,9 @@ async function getKibelaNoteUnfurlFromUrl(url: string): Promise<[string, Message
   }).then((res) => res.json()).then(async (json) => {
     if (json.data) {
       const note = json.data.note;
-      await storeWordCloudImage(note.id);
+      if(!wordCloudResultCache.get(note.id)){
+        await storeWordCloudImage(note.id);
+      }
       const folderName = note.folder ? `<https://${kibelaTeam}.kibe.la${note.folder.path}|${note.folder.fullName}>` : "未設定";
       const groups = note.groups.map((g:any)=>`<https://${kibelaTeam}.kibe.la${g.path}|${g.name}>`).join(', ')
       let contributors = note.contributors.nodes.map((c:any) => `<${c.url}|${c.realName}>`).join('/');
@@ -379,7 +390,18 @@ async function getKibelaNoteUnfurlFromUrl(url: string): Promise<[string, Message
         ]
       };
       console.log(url, JSON.stringify(attachment));
-      return [url, attachment];
+      const channel = event.channel;
+      const messageTs = event.message_ts;
+      const unfurls = {
+        [url]: attachment
+      };
+      const unfurlArgs: ChatUnfurlArguments = {
+        channel: channel,
+        ts: messageTs,
+        unfurls: unfurls
+      };
+      console.log(JSON.stringify(unfurlArgs));
+      client.chat.unfurl(unfurlArgs);
     } else {
       console.error(`query error?: ${JSON.stringify(json)}`);
       return [];
@@ -388,58 +410,46 @@ async function getKibelaNoteUnfurlFromUrl(url: string): Promise<[string, Message
 }
 
 app.event('link_shared', async({event, client}) => {
-  console.log(`I'm from ${serverHostName}`)
-  const channel = event.channel;
-  const messageTs = event.message_ts;
-  Promise.all(event.links.map(async (link) => getKibelaNoteUnfurlFromUrl(link.url as string))).then(values => {
-    // console.log(values);
-    const unfurls = Object.fromEntries(values.filter(v => v.length > 0));
-    const unfurlArgs: ChatUnfurlArguments = {
-      channel: channel,
-      ts: messageTs,
-      unfurls: unfurls
-    };
-    console.log(JSON.stringify(unfurlArgs));
-    client.chat.unfurl(unfurlArgs);
-  }).catch((e) => console.error(e));
+  event.links.forEach(async (link) => unfurlKibelaNoteFromUrl(link.url as string, event, client));
 });
-
-let wordCloudResultCache = new LRU(numImageCaches);
-wordCloudResultCache.on('evict', (e:{key:string, value:any}) => {
-  console.warn(`LRU Cache evicted: ${e.key}`)
-});
-const pngOptimizer = new jspngopt.Optimizer();
 
 async function storeWordCloudImage(noteId: string) {
-  return fetch(kibelaEndpoint, {
-    method: "POST",
-    redirect: "follow",
-    headers: {
-      Authorization: `Bearer ${kibelaToken}`,
-      "Content-Type": "application/json",
-      Accept: "application/json",
-      "User-Agent": userAgent
-    },
-    body: JSON.stringify({
-      query: printGql(kibelaContentQuery),
-      variables: {
-        id: noteId
+  if (generatingWordClouds[noteId]) {
+    return generatingWordClouds[noteId];
+  } else {
+    const promise = fetch(kibelaEndpoint, {
+      method: "POST",
+      redirect: "follow",
+      headers: {
+        Authorization: `Bearer ${kibelaToken}`,
+        "Content-Type": "application/json",
+        Accept: "application/json",
+        "User-Agent": userAgent
+      },
+      body: JSON.stringify({
+        query: printGql(kibelaContentQuery),
+        variables: {
+          id: noteId
+        }
+      })
+    }).then((r) => r.json()).then(async (json) => {
+      if (json.data) {
+        const note = json.data.note;
+        const textContent = htmlToText(note.content)
+        const pngBuffer = await getWordCloudImage(textContent);
+        console.log(`generated ${noteId}: length:${pngBuffer.length}`);
+        wordCloudResultCache.set(noteId, pngBuffer);
+        const optimized = pngOptimizer.bufferSync(pngBuffer);
+        console.log(`optimized ${noteId}: length:${optimized.length}`);
+        wordCloudResultCache.set(noteId, optimized);
+        delete generatingWordClouds[noteId];
+      } else {
+        console.error(json);
       }
-    })
-  }).then((r) => r.json()).then(async (json) => {
-    if (json.data) {
-      const note = json.data.note;
-      const textContent = htmlToText(note.content)
-      const pngBuffer = await getWordCloudImage(textContent);
-      console.log(`generated ${noteId}: length:${pngBuffer.length}`);
-      wordCloudResultCache.set(noteId, pngBuffer);
-      const optimized = pngOptimizer.bufferSync(pngBuffer);
-      console.log(`optimized ${noteId}: length:${optimized.length}`);
-      wordCloudResultCache.set(noteId, optimized);
-    } else {
-      console.error(json);
-    }
-  })
+    });
+    generatingWordClouds[noteId] = promise;
+    return promise;
+  }
 }
 
 receiver.router.get('/wordcloud/:noteId.png', (req, res) => {
