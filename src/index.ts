@@ -30,7 +30,12 @@ const kibelaTeam = process.env.KIBELA_TEAM;
 const kibelaToken = process.env.KIBELA_TOKEN;
 const kibelaEndpoint = `https://${kibelaTeam}.kibe.la/api/v1`;
 const userAgent = "Slack-To-Kibela-Emoji-Syncer/1.0.0";
-const fontFile = "/app/font.ttf"
+const fontFile = "./font.ttf"
+const w = 420
+const h = 180
+const fontSize = 50
+const fontMinSize = 20
+const padding = 2
 
 const kibelaEmojiMutationQuery = gql`
 mutation($code: String!, $url: String!) {
@@ -74,7 +79,6 @@ query($path: String!) {
     url
     publishedAt
     contentUpdatedAt
-    summary: contentSummaryHtml
   }
 }
 `
@@ -231,18 +235,14 @@ async function getWordCloudImageURI(content: string): Promise<string> {
             }
         })
 
-        const w = 420
-        const h = 180
-        const fontSize = 40
-        const padding = 2
         Canvas.registerFont(fontFile, {family: 'Impact'})
         cloud().size([w, h])
         .canvas(() => Canvas.createCanvas(1, 1))
         .words(sortByRatioWords)
         .padding(padding)
         .font("Impact")
-        .fontSize((word:any) => fontSize/2 + word.ratio * fontSize/2)
-        .rotate((word:any) => word.count % 2 === 1 ? 0 : 90)
+        .fontSize((word:any) => fontMinSize + word.ratio * (fontSize - fontMinSize))
+        .rotate((word:any) => Math.random() < 0.5 ? 0 : 90)
         .on("end", ((words:any) => {
             // console.log(JSON.stringify(words))
             const d3n = new D3Node({canvasModule: Canvas})
@@ -299,14 +299,6 @@ async function getKibelaNoteUnfurlFromUrl(url: string): Promise<[string, Message
   }).then((res) => res.json()).then(async (json) => {
     if (json.data) {
       const note = json.data.note;
-      // const attachment: MessageAttachment = {
-      //   author_icon: note.author.avatarImage.url,
-      //   author_name: note.author.account,
-      //   author_link: note.author.url,
-      //   title: note.title,
-      //   title_link: note.url,
-      //   text: note.summary
-      // };
       const folderName = note.folder ? `<https://${kibelaTeam}.kibe.la${note.folder.path}|${note.folder.fullName}>` : "未設定";
       const groups = note.groups.map((g:any)=>`<https://${kibelaTeam}.kibe.la${g.path}|${g.name}>`).join(', ')
       let contributors = note.contributors.nodes.map((c:any) => `<${c.url}|${c.realName}>`).join('/');
