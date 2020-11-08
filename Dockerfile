@@ -15,6 +15,12 @@ RUN apk add \
     git-lfs \
     xz \
     ;
+RUN git clone -b master --single-branch --depth=1 https://github.com/sable-virt/kuromoji-js-dictionary.git /app/kuromoji-js-dictionary
+WORKDIR /app/kuromoji-js-dictionary
+RUN npm ci
+RUN npm run xz
+RUN npm run tar
+RUN ./bin/run && mv dist ../dict
 
 FROM node:lts-alpine AS builder
 
@@ -49,6 +55,7 @@ RUN apk add --no-cache \
 
 WORKDIR /app
 COPY --from=font-getter /app/font.ttf /app/font.ttf
+COPY --from=dict-getter /app/dict /app/dict
 COPY --from=builder /app/node_modules /app/node_modules
 COPY --from=builder /app/lib /app/lib
 COPY ./public/generating.png ./public/
