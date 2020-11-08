@@ -40,7 +40,7 @@ const h = 180;
 const fontSize = 50;
 const fontMinSize = 20;
 const padding = 2;
-const cacheDir = "./cache"
+const numImageCaches = parseInt(process.env.NUM_IMAGE_CACHE || "200");
 
 const kibelaEmojiMutationQuery = gql`
 mutation($code: String!, $url: String!) {
@@ -125,7 +125,7 @@ async function createEmoji(code: string, imageUrl: string) {
       })
     }).then(response => {
       console.log(`create request ${code}: ${JSON.stringify(response)}`)
-    }).catch(e => console.log(`fetch request error: ${e}`))
+    }).catch(e => console.error(`fetch request error: ${e}`))
   })
 }
 
@@ -163,11 +163,11 @@ app.message(/emoji sync/, async ({ message, context, say }) => {
   if (result.ok) {
     say(`Start emoji sync`)
     for (const code in result.emoji) {
-      await createEmoji(code, result.emoji[code]).catch(e => console.log(`CreateEmoji Error: ${e}`));
+      await createEmoji(code, result.emoji[code]).catch(e => console.error(`CreateEmoji Error: ${e}`));
     }
     say(`OK! imported ${Object.keys(result.emoji).length} emojis`);
   } else {
-    console.log(result.error);
+    console.error(result.error);
   }
 });
 
@@ -206,7 +206,7 @@ app.event('emoji_changed', async({event, client, context}) => {
       }
     }
   } catch (error) {
-    console.log(JSON.stringify(error));
+    console.error(JSON.stringify(error));
   }
 });
 
@@ -214,7 +214,7 @@ async function getWordCloudImage(content: string): Promise<Buffer> {
   return new Promise((resolve, reject) => {
     kuromoji.builder({dicPath}).build((err: any, tokenizer: any) => {
         if (err) {
-            console.log("kuromoji error:", err)
+            console.error("kuromoji error:", err)
             reject(err)
         }
         const tokens = tokenizer.tokenize(content)
@@ -381,7 +381,7 @@ async function getKibelaNoteUnfurlFromUrl(url: string): Promise<[string, Message
       console.log(url, JSON.stringify(attachment));
       return [url, attachment];
     } else {
-      console.log(`query error?: ${JSON.stringify(json)}`);
+      console.error(`query error?: ${JSON.stringify(json)}`);
       return [];
     }
   });
@@ -401,10 +401,10 @@ app.event('link_shared', async({event, client}) => {
     };
     console.log(JSON.stringify(unfurlArgs));
     client.chat.unfurl(unfurlArgs);
-  }).catch((e) => console.log(e));
+  }).catch((e) => console.error(e));
 });
 
-let wordCloudResultCache = new LRU(100);
+let wordCloudResultCache = new LRU(numImageCaches);
 wordCloudResultCache.on('evict', (e:{key:string, value:any}) => {
   console.warn(`LRU Cache evicted: ${e.key}`)
 });
@@ -437,7 +437,7 @@ async function storeWordCloudImage(noteId: string) {
       console.log(`optimized ${noteId}: length:${optimized.length}`);
       wordCloudResultCache.set(noteId, optimized);
     } else {
-      console.log(json);
+      console.error(json);
     }
   })
 }
@@ -495,7 +495,7 @@ receiver.app.post('/kibela-webhook', (req, res) => {
         storeWordCloudImage(noteId);
       }
     } else {
-      console.log(json);
+      console.error(json);
     }
   })
 });
