@@ -16,8 +16,7 @@ RUN apk add \
     xz \
     ;
 
-RUN git clone -b master --single-branch --depth=1 https://github.com/sable-virt/kuromoji-js-dictionary.git /app/kuromoji-js-dictionary
-RUN git status -s | cut -c 4- | xargs git update-index --assume-unchanged
+RUN git clone https://github.com/sable-virt/kuromoji-js-dictionary.git /app/kuromoji-js-dictionary
 WORKDIR /app/kuromoji-js-dictionary
 RUN npm ci
 RUN npm run xz
