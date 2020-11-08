@@ -22,7 +22,8 @@ const { JSDOM } = require('jsdom')
 const Canvas = require('canvas')
 const fabric = require('fabric').fabric
 
-const dicPath = './dict';
+const dicPath = './node_modules/kuromoji/dict';
+// const dicPath = './dict';
 // const targetPosList = ['名詞', '形容詞', '動詞'];
 const targetPosList = ['名詞'];
 const ngWords = ['https', '://', '[', ']', '@', 'co', 'jp', 'com', '/', 'in', "もの","これ","ため","それ","ところ","よう", "の", "こと", "とき", "ん"]
@@ -390,27 +391,31 @@ async function unfurlKibelaNoteFromUrl(url: string, event: LinkSharedEvent, clie
         ]
       };
       console.log(url, JSON.stringify(attachment));
-      const channel = event.channel;
-      const messageTs = event.message_ts;
       const unfurls = {
         [url]: attachment
       };
-      const unfurlArgs: ChatUnfurlArguments = {
-        channel: channel,
-        ts: messageTs,
-        unfurls: unfurls
-      };
-      console.log(JSON.stringify(unfurlArgs));
-      client.chat.unfurl(unfurlArgs);
+      return unfurls;
     } else {
       console.error(`query error?: ${JSON.stringify(json)}`);
-      return [];
+      return {};
     }
   });
 }
 
 app.event('link_shared', async({event, client}) => {
-  event.links.forEach(async (link) => unfurlKibelaNoteFromUrl(link.url as string, event, client));
+  Promise.all(event.links.map(async (link) => unfurlKibelaNoteFromUrl(link.url as string, event, client))).then((values) => {
+    const unfurls = values.reduce((old, v) => (Object.assign(old, v)), {});
+    values.forEach((v) => unfurls)
+    const channel = event.channel;
+    const messageTs = event.message_ts;
+    const unfurlArgs: ChatUnfurlArguments = {
+      channel: channel,
+      ts: messageTs,
+      unfurls: unfurls
+    };
+    console.log(JSON.stringify(unfurlArgs));
+    client.chat.unfurl(unfurlArgs);
+  });
 });
 
 async function storeWordCloudImage(noteId: string) {
