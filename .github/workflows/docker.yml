@@ -1,5 +1,8 @@
 name: Publish Docker image
-on: push
+on:
+  push:
+    branches: master
+
 jobs:
   publish_image:
     runs-on: ubuntu-latest
