@@ -40,6 +40,7 @@ const h = 180;
 const fontSize = 50;
 const fontMinSize = 20;
 const padding = 2;
+const cacheDir = "./cache"
 
 const kibelaEmojiMutationQuery = gql`
 mutation($code: String!, $url: String!) {
@@ -138,7 +139,7 @@ receiver.router.post("/slack/events", async (req, res, next) => {
   res.redirect(307, "/real_slack/events");
 });
 
-receiver.app.use(express.static('public'));
+// receiver.app.use(express.static('public'));
 receiver.app.use(bodyParser.json({limit: "10mb"}));
 
 const app = new App({
@@ -315,6 +316,7 @@ async function getKibelaNoteUnfurlFromUrl(url: string): Promise<[string, Message
   }).then((res) => res.json()).then(async (json) => {
     if (json.data) {
       const note = json.data.note;
+      await storeWordCloudImage(note.id);
       const folderName = note.folder ? `<https://${kibelaTeam}.kibe.la${note.folder.path}|${note.folder.fullName}>` : "未設定";
       const groups = note.groups.map((g:any)=>`<https://${kibelaTeam}.kibe.la${g.path}|${g.name}>`).join(', ')
       let contributors = note.contributors.nodes.map((c:any) => `<${c.url}|${c.realName}>`).join('/');
@@ -409,7 +411,7 @@ wordCloudResultCache.on('evict', (e:{key:string, value:any}) => {
 const pngOptimizer = new jspngopt.Optimizer();
 
 async function storeWordCloudImage(noteId: string) {
-  fetch(kibelaEndpoint, {
+  return fetch(kibelaEndpoint, {
     method: "POST",
     redirect: "follow",
     headers: {
@@ -429,9 +431,6 @@ async function storeWordCloudImage(noteId: string) {
       const note = json.data.note;
       const textContent = htmlToText(note.content)
       const pngBuffer = await getWordCloudImage(textContent);
-      // res.setHeader('Content-Type', 'image/png');
-      // res.setHeader('Cache-Control', 'public');
-      // res.send(buffer);
       console.log(`generated ${noteId}: length:${pngBuffer.length}`);
       wordCloudResultCache.set(noteId, pngBuffer);
       const optimized = pngOptimizer.bufferSync(pngBuffer);
@@ -446,33 +445,19 @@ async function storeWordCloudImage(noteId: string) {
 receiver.router.get('/wordcloud/:noteId.png', (req, res) => {
   const noteId = req.params.noteId;
   console.log("wordcloud", noteId, "LRU:", wordCloudResultCache.length);
-  // if(!!req.headers["if-modified-since"]){
-  //   console.log("cached");
-  //   res.status(304);
-  //   res.send();
-  //   return;
-  // }
   const cached = wordCloudResultCache.get(noteId);
   if (cached) {
-    const ret = cached;
     wordCloudResultCache.peek(noteId);
     res.setHeader('Content-Type', 'image/png');
     res.setHeader('Cache-Control', 'public');
-    res.send(ret);
+    res.send(cached);
     return;
   } else {
-    // res.setHeader('Content-Type', 'image/png');
-    // res.setHeader('Cache-Control', 'no-cache');
-    // const buffer = fs.readFileSync(generatingPngFile);
-    // res.send(buffer);
-    // res.status(500)
-    // res.send()
-    console.log("return generating.png");
-    res.status(307);
-    res.setHeader('Location', `/generating.png`);
-    res.send();
     storeWordCloudImage(noteId);
-    }
+    res.setHeader('Content-Type', 'image/png');
+    res.setHeader('Cache-Control', 'public');
+    res.send(wordCloudResultCache.get(noteId));
+  }
 });
 
 receiver.app.post('/kibela-webhook', (req, res) => {
