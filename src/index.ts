@@ -22,8 +22,8 @@ const { JSDOM } = require('jsdom')
 const Canvas = require('canvas')
 const fabric = require('fabric').fabric
 
-// const dicPath = './node_modules/kuromoji/dict';
-const dicPath = './dict';
+const dicPath = './node_modules/kuromoji/dict';
+// const dicPath = './dict';
 // const targetPosList = ['名詞', '形容詞', '動詞'];
 const targetPosList = ['名詞'];
 const ngWords = ['https', '://', '[', ']', '@', 'co', 'jp', 'com', '/', 'in', "もの","これ","ため","それ","ところ","よう", "の", "こと", "とき", "ん"]
@@ -513,6 +513,9 @@ receiver.app.post('/kibela-webhook', (req, res) => {
       console.error(json);
     }
   })
+});
+receiver.app.get('/', (req, res) => {
+  res.send('OK');
 });
 
 (async () => {
