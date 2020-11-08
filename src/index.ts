@@ -1,3 +1,6 @@
+import fs from 'fs';
+import express from 'express';
+import bodyParser from 'body-parser';
 import { App, ExpressReceiver } from '@slack/bolt';
 import { LinkUnfurls, MessageAttachment } from '@slack/types';
 import fetch from "node-fetch";
@@ -6,19 +9,20 @@ import { print as printGql } from "graphql/language/printer"
 import { ChatUnfurlArguments } from '@slack/web-api';
 const {htmlToText} = require('html-to-text');
 const LRU = require('lru');
+const jspngopt = require("jspngopt");
 
 // const kuromoji = require('kuromoji')
 import * as kuromoji from 'kuromoji'
 import { isConstructorDeclaration } from 'typescript';
+import { send } from 'process';
 const D3Node = require('d3-node')
 const d3 = require('d3')
 const cloud = require('d3-cloud')
 const { JSDOM } = require('jsdom')
 const Canvas = require('canvas')
-const fs = require('fs')
 const fabric = require('fabric').fabric
 
-const dicPath = './node_modules/kuromoji/dict'
+const dicPath = './dict';
 // const targetPosList = ['名詞', '形容詞', '動詞'];
 const targetPosList = ['名詞'];
 const ngWords = ['https', '://', '[', ']', '@', 'co', 'jp', 'com', '/', 'in', "もの","これ","ため","それ","ところ","よう", "の", "こと", "とき", "ん"]
@@ -30,12 +34,12 @@ const kibelaTeam = process.env.KIBELA_TEAM;
 const kibelaToken = process.env.KIBELA_TOKEN;
 const kibelaEndpoint = `https://${kibelaTeam}.kibe.la/api/v1`;
 const userAgent = "Slack-To-Kibela-Emoji-Syncer/1.0.0";
-const fontFile = "./font.ttf"
-const w = 420
-const h = 180
-const fontSize = 50
-const fontMinSize = 20
-const padding = 2
+const fontFile = "./font.ttf";
+const w = 420;
+const h = 180;
+const fontSize = 50;
+const fontMinSize = 20;
+const padding = 2;
 
 const kibelaEmojiMutationQuery = gql`
 mutation($code: String!, $url: String!) {
@@ -46,7 +50,7 @@ mutation($code: String!, $url: String!) {
     clientMutationId
   }
 }
-`
+`;
 
 const kibelaLinkDescriptionQuery = gql`
 query($path: String!) {
@@ -81,7 +85,7 @@ query($path: String!) {
     contentUpdatedAt
   }
 }
-`
+`;
 
 const kibelaContentQuery = gql`
 query($id: ID!) {
@@ -89,7 +93,15 @@ query($id: ID!) {
     content: contentHtml
   }
 }
-`
+`;
+
+const kibelaGetIdFromPathQuery = gql`
+query($path: String!) {
+  note: noteFromPath(path: $path) {
+    id
+  }
+}
+`;
 
 async function createEmoji(code: string, imageUrl: string) {
   return imageDataURI.encodeFromURL(imageUrl).then((datauri: string) => {
@@ -125,6 +137,9 @@ receiver.router.post("/slack/events", async (req, res, next) => {
   console.log("redirect to real_slack");
   res.redirect(307, "/real_slack/events");
 });
+
+receiver.app.use(express.static('public'));
+receiver.app.use(bodyParser.json({limit: "10mb"}));
 
 const app = new App({
   token: process.env.SLACK_BOT_TOKEN,
@@ -194,7 +209,7 @@ app.event('emoji_changed', async({event, client, context}) => {
   }
 });
 
-async function getWordCloudImageURI(content: string): Promise<string> {
+async function getWordCloudImage(content: string): Promise<Buffer> {
   return new Promise((resolve, reject) => {
     kuromoji.builder({dicPath}).build((err: any, tokenizer: any) => {
         if (err) {
@@ -271,7 +286,8 @@ async function getWordCloudImageURI(content: string): Promise<string> {
             const fabricCanvas = new fabric.Canvas(null, {width: w, height: h})
             fabric.loadSVGFromString(d3n.svgString(), (objects:any, options:any) => {
                 fabricCanvas.add(fabric.util.groupSVGElements(objects)).renderAll();
-                resolve(fabricCanvas.toDataURL());
+                const buffer = Buffer.from(fabricCanvas.toDataURL().slice("data:image/png;base64,".length), "base64");
+                resolve(buffer);
             })
         }))
         .start()
@@ -307,7 +323,7 @@ async function getKibelaNoteUnfurlFromUrl(url: string): Promise<[string, Message
       }
       // const imageUrl = await getWordCloudDataURI(note.content)
       const attachment: MessageAttachment = {
-        color: "#327AC2",
+        // color: "#327AC2",
         blocks: [
           {
             type: "section",
@@ -360,7 +376,7 @@ async function getKibelaNoteUnfurlFromUrl(url: string): Promise<[string, Message
           }
         ]
       };
-      // console.log(url, JSON.stringify(attachment).slice(0, 200));
+      console.log(url, JSON.stringify(attachment));
       return [url, attachment];
     } else {
       console.log(`query error?: ${JSON.stringify(json)}`);
@@ -387,29 +403,13 @@ app.event('link_shared', async({event, client}) => {
 });
 
 let wordCloudResultCache = new LRU(100);
+wordCloudResultCache.on('evict', (e:{key:string, value:any}) => {
+  console.warn(`LRU Cache evicted: ${e.key}`)
+});
+const pngOptimizer = new jspngopt.Optimizer();
 
-receiver.router.get('/wordcloud/:noteId.png', (req, res) => {
-  const noteId = req.params.noteId;
-  console.log("wordcloud", noteId, "LRU:", wordCloudResultCache.length);
-  // if(!!req.headers["if-modified-since"]){
-  //   console.log("cached");
-  //   res.status(304);
-  //   res.send();
-  //   return;
-  // }
-  const cached = wordCloudResultCache.get(noteId);
-  if (cached) {
-    const ret = cached;
-    wordCloudResultCache.peek(noteId);
-    res.setHeader('Content-Type', 'image/png');
-    res.setHeader('Cache-Control', 'public');
-    res.append('Last-Modified', (new Date()).toUTCString());
-    const buffer = Buffer.from(ret, 'base64');
-    console.log("return cached response");
-    res.send(buffer);
-    return;
-  } 
-  return fetch(kibelaEndpoint, {
+async function storeWordCloudImage(noteId: string) {
+  fetch(kibelaEndpoint, {
     method: "POST",
     redirect: "follow",
     headers: {
@@ -428,14 +428,87 @@ receiver.router.get('/wordcloud/:noteId.png', (req, res) => {
     if (json.data) {
       const note = json.data.note;
       const textContent = htmlToText(note.content)
-      const ret = (await getWordCloudImageURI(textContent)).slice("data:image/png;base64,".length);
-      res.setHeader('Content-Type', 'image/png');
-      res.setHeader('Cache-Control', 'public');
-      res.append('Last-Modified', (new Date()).toUTCString());
-      const buffer = Buffer.from(ret, 'base64');
-      console.log("response length(base64):", ret.length);
-      res.send(buffer);
-      wordCloudResultCache.set(noteId, ret);
+      const pngBuffer = await getWordCloudImage(textContent);
+      // res.setHeader('Content-Type', 'image/png');
+      // res.setHeader('Cache-Control', 'public');
+      // res.send(buffer);
+      console.log(`generated ${noteId}: length:${pngBuffer.length}`);
+      wordCloudResultCache.set(noteId, pngBuffer);
+      const optimized = pngOptimizer.bufferSync(pngBuffer);
+      console.log(`optimized ${noteId}: length:${optimized.length}`);
+      wordCloudResultCache.set(noteId, optimized);
+    } else {
+      console.log(json);
+    }
+  })
+}
+
+receiver.router.get('/wordcloud/:noteId.png', (req, res) => {
+  const noteId = req.params.noteId;
+  console.log("wordcloud", noteId, "LRU:", wordCloudResultCache.length);
+  // if(!!req.headers["if-modified-since"]){
+  //   console.log("cached");
+  //   res.status(304);
+  //   res.send();
+  //   return;
+  // }
+  const cached = wordCloudResultCache.get(noteId);
+  if (cached) {
+    const ret = cached;
+    wordCloudResultCache.peek(noteId);
+    res.setHeader('Content-Type', 'image/png');
+    res.setHeader('Cache-Control', 'public');
+    res.send(ret);
+    return;
+  } else {
+    // res.setHeader('Content-Type', 'image/png');
+    // res.setHeader('Cache-Control', 'no-cache');
+    // const buffer = fs.readFileSync(generatingPngFile);
+    // res.send(buffer);
+    // res.status(500)
+    // res.send()
+    console.log("return generating.png");
+    res.status(307);
+    res.setHeader('Location', `/generating.png`);
+    res.send();
+    storeWordCloudImage(noteId);
+    }
+});
+
+receiver.app.post('/kibela-webhook', (req, res) => {
+  console.log(req.body);
+  res.send("");
+  const targetResources = ["blog", "wiki"];
+  if (!targetResources.includes(req.body.resource_type)) {
+    return;
+  }
+  const path = req.body[req.body.resource_type].url;
+  fetch(kibelaEndpoint, {
+    method: "POST",
+    redirect: "follow",
+    headers: {
+      Authorization: `Bearer ${kibelaToken}`,
+      "Content-Type": "application/json",
+      Accept: "application/json",
+      "User-Agent": userAgent
+    },
+    body: JSON.stringify({
+      query: printGql(kibelaGetIdFromPathQuery),
+      variables: {
+        path: path
+      }
+    })
+  }).then((r) => r.json()).then(async (json) => {
+    if (json.data) {
+      const note = json.data.note;
+      const noteId = note.id;
+      if (req.body.action === "delete") {
+        console.log(`Deleting cache for ${noteId}`)
+        wordCloudResultCache.delete(noteId);
+      } else {
+        console.log(`Generating cache for ${noteId}`)
+        storeWordCloudImage(noteId);
+      }
     } else {
       console.log(json);
     }

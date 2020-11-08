@@ -25,16 +25,20 @@
     "url": "https://github.com/kounoike/slack-to-kibela-emoji-syncer/isues"
   },
   "homepage": "https://github.com/kounoike/slack-to-kibela-emoji-syncer#readme",
-  "dependencies": {
-    "@msgpack/msgpack": "^2.3.0",
-    "@slack/bolt": "^2.2.3",
-    "@slack/types": "^1.10.0",
-    "@slack/web-api": "^5.13.0",
+  "devDependencies": {
     "@types/graphql": "^14.5.0",
     "@types/html-to-text": "^5.1.2",
     "@types/kuromoji": "^0.1.0",
     "@types/node": "<13",
     "@types/node-fetch": "^2.5.7",
+    "ts-node": "^8.4.1",
+    "typescript": "^3.6.3"
+  },
+  "dependencies": {
+    "@msgpack/msgpack": "^2.3.0",
+    "@slack/bolt": "^2.2.3",
+    "@slack/types": "^1.10.0",
+    "@slack/web-api": "^5.13.0",
     "canvas": "^2.6.1",
     "d3": "^6.2.0",
     "d3-cloud": "^1.2.5",
@@ -45,12 +49,11 @@
     "html-to-text": "^6.0.0",
     "image-data-uri": "^2.0.1",
     "jsdom": "^16.4.0",
+    "jspngopt": "^0.2.0",
     "kuromoji": "^0.1.2",
     "lru": "^3.1.0",
     "node-fetch": "^2.6.1",
     "nodemon": "^2.0.4",
-    "svg2png": "^4.1.1",
-    "ts-node": "^8.4.1",
-    "typescript": "^3.6.3"
+    "svg2png": "^4.1.1"
   }
 }
