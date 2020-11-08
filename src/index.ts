@@ -23,7 +23,6 @@ const dicPath = './node_modules/kuromoji/dict'
 const targetPosList = ['名詞'];
 const ngWords = ['https', '://', '[', ']', '@', 'co', 'jp', 'com', '/', 'in', "もの","これ","ため","それ","ところ","よう", "の", "こと", "とき", "ん"]
 
-
 const imageDataURI = require("image-data-uri");
 
 const emojiChannel = process.env.EMOJI_CHANNEL || "#emoji";
@@ -31,6 +30,7 @@ const kibelaTeam = process.env.KIBELA_TEAM;
 const kibelaToken = process.env.KIBELA_TOKEN;
 const kibelaEndpoint = `https://${kibelaTeam}.kibe.la/api/v1`;
 const userAgent = "Slack-To-Kibela-Emoji-Syncer/1.0.0";
+const fontFile = "/usr/share/fonts/noto/NotoSansCJK-Black.ttc"
 
 const kibelaEmojiMutationQuery = gql`
 mutation($code: String!, $url: String!) {
@@ -235,7 +235,7 @@ async function getWordCloudImageURI(content: string): Promise<string> {
         const h = 180
         const fontSize = 40
         const padding = 2
-        Canvas.registerFont("./sazanami-gothic.ttf", {family: 'Impact'})
+        Canvas.registerFont(fontFile, {family: 'Impact'})
         cloud().size([w, h])
         .canvas(() => Canvas.createCanvas(1, 1))
         .words(sortByRatioWords)
@@ -246,7 +246,7 @@ async function getWordCloudImageURI(content: string): Promise<string> {
         .on("end", ((words:any) => {
             // console.log(JSON.stringify(words))
             const d3n = new D3Node({canvasModule: Canvas})
-            d3n.options.canvasModule.registerFont("./sazanami-gothic.ttf", {family: 'Impact'})
+            d3n.options.canvasModule.registerFont(fontFile, {family: 'Impact'})
 
             d3n
             .createSVG(w, h)
