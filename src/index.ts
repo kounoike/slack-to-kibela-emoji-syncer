@@ -30,7 +30,7 @@ const kibelaTeam = process.env.KIBELA_TEAM;
 const kibelaToken = process.env.KIBELA_TOKEN;
 const kibelaEndpoint = `https://${kibelaTeam}.kibe.la/api/v1`;
 const userAgent = "Slack-To-Kibela-Emoji-Syncer/1.0.0";
-const fontFile = "/usr/share/fonts/noto/NotoSansCJK-Black.ttc"
+const fontFile = "/app/font.ttf"
 
 const kibelaEmojiMutationQuery = gql`
 mutation($code: String!, $url: String!) {
