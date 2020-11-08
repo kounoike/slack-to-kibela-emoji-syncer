@@ -23,6 +23,14 @@ SLACKとKibelaの両方でトークンが必要。
 
 TODO:削除イベントを見てKibela側からも削除する。
 
+## 開発
+
+ローカルで開発する場合は環境変数を.envに入れておく。 `export $(cat .env)`とすれば環境変数が設定されるし、dockerなら `docker build --env-file=.env` とする。
+
+## フォント
+
+デフォルトのフォントとして http://jikasei.me/font/rounded-mgenplus/ を使っています。
+
 ## Slack ⚡️ Bolt
 
 A framework to build Slack apps, fast.
