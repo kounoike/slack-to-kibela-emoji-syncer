@@ -58,6 +58,5 @@ COPY --from=font-getter /app/font.ttf /app/font.ttf
 COPY --from=dict-getter /app/dict /app/dict
 COPY --from=builder /app/node_modules /app/node_modules
 COPY --from=builder /app/lib /app/lib
-COPY ./public/generating.png ./public/
 
 # ENTRYPOINT ["npm", "run" "start"]
