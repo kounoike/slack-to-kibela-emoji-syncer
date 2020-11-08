@@ -16,6 +16,7 @@ RUN apk add \
     xz \
     ;
 
+WORKDIR /app
 RUN git clone https://github.com/sable-virt/kuromoji-js-dictionary.git /app/kuromoji-js-dictionary
 WORKDIR /app/kuromoji-js-dictionary
 RUN npm ci
