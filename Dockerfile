@@ -9,20 +9,20 @@ WORKDIR /app
 RUN wget -q -O font.7z $MGENPLUS_URL
 RUN 7z e font.7z $MGENPLUS_FONT && mv $MGENPLUS_FONT font.ttf
 
-FROM node:lts-alpine AS dict-getter
-RUN apk add \
-    git \
-    git-lfs \
-    xz \
-    ;
+# FROM node:lts-alpine AS dict-getter
+# RUN apk add \
+#     git \
+#     git-lfs \
+#     xz \
+#     ;
 
-WORKDIR /app
-RUN git clone https://github.com/sable-virt/kuromoji-js-dictionary.git /app/kuromoji-js-dictionary
-WORKDIR /app/kuromoji-js-dictionary
-RUN npm ci
-RUN npm run xz
-RUN npm run tar
-RUN ./bin/run && mv dist ../dict
+# WORKDIR /app
+# RUN git clone https://github.com/sable-virt/kuromoji-js-dictionary.git /app/kuromoji-js-dictionary
+# WORKDIR /app/kuromoji-js-dictionary
+# RUN npm ci
+# RUN npm run xz
+# RUN npm run tar
+# RUN ./bin/run && mv dist ../dict
 
 FROM node:lts-alpine AS builder
 
@@ -58,7 +58,7 @@ RUN apk add --no-cache \
 
 WORKDIR /app
 COPY --from=font-getter /app/font.ttf /app/font.ttf
-COPY --from=dict-getter /app/dict /app/dict
+# COPY --from=dict-getter /app/dict /app/dict
 COPY --from=builder /app/node_modules /app/node_modules
 COPY --from=builder /app/lib /app/lib
 
