@@ -327,7 +327,7 @@ async function unfurlKibelaNoteFromUrl(url: string, event: LinkSharedEvent, clie
     if (json.data) {
       const note = json.data.note;
       if(!wordCloudResultCache.get(note.id)){
-        await storeWordCloudImage(note.id);
+        // stop wordcloud await storeWordCloudImage(note.id);
       }
       const folderName = note.folder ? `<https://${kibelaTeam}.kibe.la${note.folder.path}|${note.folder.fullName}>` : "未設定";
       const groups = note.groups.map((g:any)=>`<https://${kibelaTeam}.kibe.la${g.path}|${g.name}>`).join(', ')
@@ -346,11 +346,11 @@ async function unfurlKibelaNoteFromUrl(url: string, event: LinkSharedEvent, clie
               text: `Kibela記事 | <${note.url}|*${note.title}*>`,
             },
           },
-          {
-              type: "image",
-              image_url: `https://${serverHostName}/wordcloud/${encodeURI(note.id)}.png`,
-              alt_text: "Kibela"
-          },
+          // {
+          //     type: "image",
+          //     image_url: `https://${serverHostName}/wordcloud/${encodeURI(note.id)}.png`,
+          //     alt_text: "Kibela"
+          // },
           {
             type: "context",
             elements: [
@@ -479,7 +479,8 @@ receiver.app.post('/kibela-webhook', (req, res) => {
   console.log(req.body);
   res.send("");
   const targetResources = ["blog", "wiki"];
-  if (!targetResources.includes(req.body.resource_type)) {
+  const generateWordCloud = false;
+  if (!targetResources.includes(req.body.resource_type) || !generateWordCloud) {
     return;
   }
   const path = req.body[req.body.resource_type].url;

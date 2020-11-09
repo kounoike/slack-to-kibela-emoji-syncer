@@ -3,6 +3,6 @@ jspm_packages
 .serverless
 .webpack
 .env
-lib/
+/lib/
 kuromoji-js-dictionary/
 dict/
