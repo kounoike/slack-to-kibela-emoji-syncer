@@ -36,4 +36,4 @@ jobs:
             kounoike/slack-to-kibela-emoji-syncer:latest
             kounoike/slack-to-kibela-emoji-syncer:1.0.0
             ghcr.io/kounoike/slack-to-kibela-emoji-syncer:latest
-            ghcr.io/kounoike/slack-to-kibela-emoji-syncer:1.0.0
+            ghcr.io/kounoike/slack-to-kibela-emoji-syncer:1.0.1
